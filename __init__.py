@@ -15,12 +15,12 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1 2002/05/30 13:37:18 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.1 2002/07/24 22:19:54 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
 import DTMLTeX
-from tex_quote import tex_quote, __init__
+from tex_quote import tex_quote, __init__25, __init__24
 from zLOG import LOG
 
 def initialize(context):
@@ -37,10 +37,31 @@ def initialize(context):
 
 
 # The DTML monkeypatch ...
+
 LOG('DTMLTeX',0, 'Applying tex_quote DTML monkeypatch.')
+
+# We need two different patches for 2.4.X and 2.5.X
+from App import version_txt
+
+version = version_txt.getZopeVersion()
+_version = version[0] + "." + version[1]
+
+if version[0] != 2:
+    LOG("DTMLTeX", 500, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
+    raise "CompatibilityError"
+elif version[1] < 4:
+    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( < 2.4 ). Trying to apply patch for Zope 2.4 maybe this works.")
+    new = __init__24
+elif version[1] == 4:
+    new = __init__24
+elif version[1] == 5:
+    new = __init__25
+elif version[1] > 5:
+    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( > 2.5 ). Trying to apply patch for Zope 2.5 maybe this works.")
+    new = __init__25
+    
 from DocumentTemplate import DT_Var
 DT_Var.modifiers.append( (tex_quote.__name__,tex_quote) )
 oldinit = DT_Var.Var.__init__
-DT_Var.Var.__init__ = __init__
+DT_Var.Var.__init__ = new
 DT_Var.Var.__init__.im_func.func_globals.update(oldinit.im_func.func_globals)
-
