@@ -1,1 +1,1 @@
-DTMLTeX 0.6pre2
+DTMLTeX 0.6
