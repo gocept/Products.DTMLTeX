@@ -1,3 +1,7 @@
+Version 0.5.1
+
+    - A bug preventing nested DTMLTeX methods has been fixed
+
 Version 0.5
 
     - Changed file extension handling to head MIME type.
