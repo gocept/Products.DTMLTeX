@@ -1,103 +1,34 @@
-\documentclass{article}
-\usepackage{a4,german,isolatin1,epsfig,ifthen}
-\setlength{\voffset}{-1cm}
-\setlength{\hoffset}{-1.7cm}
-\setlength{\topmargin}{0cm}
-\setlength{\oddsidemargin}{0cm}
-\setlength{\topmargin}{0cm}
-\setlength{\textwidth}{19.5cm}
-\setlength{\textheight}{29cm}
-\setlength{\headheight}{0cm}
-\setlength{\headsep}{0cm}
-\pagestyle{empty}
+\documentclass[fromrule,fromlogo,frombank]{scrlttr2}
 
-<dtml-call "REQUEST.set('date',_.DateTime() )" >
-\newcommand{\chief}{<dtml-var instructor>}
-\newcommand{\Title}{<dtml-var course_title>}
-\newcommand{\descr}{<dtml-var course_desc>}
-\newcommand{\term}{<dtml-var term>}
-\newcommand{\logo}{<dtml-var "perltexlogo.create_temp()">}
-\newcommand{\rublogo}{<dtml-var "rubtexlogo.create_temp()">}
-\newcommand{\Date}{<dtml-var "_.string.join( ( _.str(date.dd()),_.str(date.mm()),_.str(date.year()) ),'.')">}
-\newcommand{\meet}{<dtml-var count fmt="%i">}
-\newcommand{\sws} {<dtml-var sws>}
+\usepackage{charter}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[T1]{fontenc}
 
-\newcommand{\cert}[4]{
-%0-Art,1-Name,2-Matr.Nr,3-Leistungen
-\begin{center}
-   {\large\bfseries\sffamily 
-     RUHR-UNIVERSITÄT-BOCHUM\\
-     Rechenzentrum}
-  
-  \hrulefill
-  \vspace{3mm}\\
-  {\large\bfseries\sffamily Leistungsnachweis}\\[3mm]
-  {\large\bfseries\sffamily \Title }\vspace{2mm}\\
-  {\bfseries Veranstaltungsleiter/in:} \chief \\ 
-  \noindent\rule{4mm}{0mm} \hrulefill \rule{9mm}{0mm}
-\end{center}
+\usepackage{graphicx}
 
-\begin{minipage}[b][45mm][c]{170mm}
-\noindent Herr/Frau {\slshape #2} 
-\ifthenelse{\equal{#1}{student}}{
- , immatrikuliert an der RUB
- unter der Matrikel-Nummer {\slshape #3},} 
- {\ifthenelse{\equal{#1}{employee}}{
-  , Mitarbeiter an der RUB in der Abteilung {\slshape #3},}{} }
-hat im {\slshape
-  \term} an oben genanntem Kurs unter meiner Leitung
-erfolgreich teilgenommen.\\[1.5ex] 
-\noindent Es fand(en) {\slshape \meet} Termin(e) a {\slshape \sws}
-  Semsterwochenstunden statt.\\[1.5ex] 
-\noindent Der Kurs beinhaltete {\slshape \descr}\\[1.5ex]
-\noindent Diesem Urteil liegen die im Folgenden genannten Leistungen des
-Teilnehmers/der Teilnehmerin zugrunde:
-\begin{quote}
-\slshape #4  
-\end{quote}
-\end{minipage}
+\setkomavar{fromname}{C. Shark}
+\setkomavar{fromaddress}{Mayfair 1\\01234 Buck city}
+\setkomavar{frombank}{1234567890}
+\setkomavar{fromlogo}{\raisebox{2pt}{%
+    \includegraphics[width=0.5in]{<dtml-var "coin.create_temp()">}}}
 
-\begin{center}
-  \hrulefill 
-\end{center}
-\epsfig{file=\rublogo,width=1.8cm}\hrulefill
-\makebox[0pt][r]{\raisebox{3pt}{
-Bochum, den \Date
-}}
-\makebox[0pt][r]{\raisebox{-2ex}{
-\small Datum
-}}
-\hfill
-\makebox[0pt][l]{\raisebox{-2ex}{
-\small Unterschrift des Leiters
-}}
-\hrulefill
-\epsfig{file=\logo,width=1.8cm}\vspace{25mm}}
+\firstfoot{\hrulefill\par
+  \footnotesize\centering Bank account: \usekomavar{frombank}}
 
 \begin{document}
 
-{\large Bescheinigungen für den Kurs: ``\Title''\\
-unter der Leitung von: \chief \\ ausgestellt am: \Date}
-\begin{center}
-\begin{tabular}{|c|c|c|}\hline
-\rule{0mm}{5mm}Name&Vorname&Matrikelnummer/Abteilung\\ \hline
-<dtml-in get_person_data>
-\rule{0mm}{5mm}<dtml-var first>&<dtml-var last>&
-<dtml-if "matnr"><dtml-var matnr>
-<dtml-elif "department"><dtml-var department>
-</dtml-if>\\ \hline
-</dtml-in>
-\end{tabular}
-\end{center}
-\newpage
+\begin{letter}{<dtml-var realname>\\<dtml-var address>}
 
-<dtml-in get_person_data>
-<dtml-if "matnr">
-\cert{student}{<dtml-var first> <dtml-var last>}{<dtml-var matnr>}{<dtml-var criteria>}
-<dtml-elif "department">
-\cert{employee}{<dtml-var first> <dtml-var last>}{<dtml-var department>}{<dtml-var criteria>}
-<dtml-else>
-\cert{other}{<dtml-var first> <dtml-var last>}{}{<dtml-var criteria>}
-</dtml-if>
-</dtml-in>
+  \setkomavar{subject}{Fee notification}
+  \opening{Dear <dtml-var salutation>,}
+
+  please note that you have the honour of receiving this example
+  letter. It would be appropriate for you to express your gratitude by
+  transferring a daily fee of \$<dtml-var amount fmt="%2.2f"> to my
+  bank account during the next <dtml-var duration fmt="%i">~years.
+
+  \closing{Yours,}
+
+\end{letter}
+
 \end{document}
