@@ -45,6 +45,11 @@ longer being patched but LaTeX-related functionality is instead in
 dtml-texvar. Documents which use tex_quote on dtml-var will stop
 working.
 
+Moreover it's necessary to makes strings subject to tex_quote
+unicode. (You might get away without if you can guarantee that the
+strings in question never contains characters beyond the system
+encoding.)
+
 EXAMPLES
 
 You can find a example for this tool in example.dtml. It's a letter

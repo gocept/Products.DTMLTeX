@@ -3,7 +3,11 @@ Version 0.7pre3
     - Set content type for LaTeX error pages to text/html to override the
       default of text/xml.
 
-    - Some code clean-up.
+    - Added \ensuremath wrappers for math mode characters like
+      superscripts to tex_quote. This makes it a very good idea to use
+      tex_quote only on unicode strings.
+
+    - Some fixes and code clean-up.
 
 Version 0.7pre2
 
