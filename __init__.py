@@ -2,14 +2,14 @@
 ######################################################################
 #
 # DTMLTeX - A Zope Product for PS/PDF generation with TeX
-# Copyright (C) 1999 Marian Kelc, 2002-2004 gocept gmbh & co. kg
+# Copyright (C) 1999 Marian Kelc, 2002-2005 gocept gmbh & co. kg
 #
 # See also LICENSE.txt
 #
 ######################################################################
 """DTMLTeX initialization.
 
-$Id: __init__.py,v 1.7 2005/01/11 22:04:08 thomas Exp $"""
+$Id: __init__.py,v 1.8 2005/01/11 22:09:54 thomas Exp $"""
 
 import DTMLTeX
 from zLOG import *

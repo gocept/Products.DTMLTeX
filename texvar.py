@@ -2,7 +2,7 @@
 ######################################################################
 #
 # DTMLTeX - A Zope Product for PS/PDF generation with TeX
-# Copyright (C) 1999 Marian Kelc, 2002-2004 gocept gmbh & co. kg
+# Copyright (C) 1999 Marian Kelc, 2002-2005 gocept gmbh & co. kg
 #
 # See also LICENSE.txt
 #
@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.7 2005/01/11 20:24:51 thomas Exp $"""
+$Id: texvar.py,v 1.8 2005/01/11 22:09:54 thomas Exp $"""
 
 # Zope imports
 
