@@ -67,3 +67,11 @@ following features:
   For an example in production use see http://www.detox.at/ and
   http://www.detox.at/index_html/pdf
 
+BUGS
+
+It is not generally possible to find out for sure whether a given
+DTMLTeX call is the original one made by whoever requested the LaTeX
+or PDF document, or a nested dtml-var call, either direct or through
+methods other than DTMLTeX. Therefore it may happen that DTMLTeX tries
+to throw only part of a document at pdflatex, which results in a LaTeX
+error.
