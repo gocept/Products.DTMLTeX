@@ -13,9 +13,9 @@ Create another new DTMLTeX object in it. Call it
 "example_content". Upload the file example_content.dtml to its content.
 
 Give "example_folder" the following properties:
-	realname="John Doe" (string)
-	address="Example road 007<newline>12345 Foo town" (text)
-	salutation="Mr Doe" (string)
+	realname="John Doe" (ustring)
+	address="Example road 007<newline>12345 Foo town" (utext)
+	salutation="Mr Doe" (ustring)
 	amount=42.0 (float)
 	duration=7 (int)
 

@@ -18,7 +18,7 @@
 \begin{document}
 
 \begin{letter}{<dtml-texvar realname tex_quote>\\
-               <dtml-texvar address tex_quote newline_to_dbs>}
+               <dtml-texvar address tex_quote format_maps="nl_to_dbs">}
 
   \setkomavar{subject}{Fee notification}
   \opening{Dear <dtml-texvar salutation tex_quote>,}
