@@ -1,60 +1,18 @@
-##############################################################################
+# -*- coding: utf-8 -*-
+######################################################################
 #
-# Copyright (c) 2001 Zope Corporation and Contributors. All Rights Reserved.
+# DTMLTeX - A Zope Product for PS/PDF generation with TeX
+# Copyright (C) 2002 Andreas Kostyrka, 2004 gocept gmbh & co. kg
 #
-# This software is subject to the provisions of the Zope Public License,
-# Version 2.0 (ZPL).  A copy of the ZPL should accompany this distribution.
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE
+# See also LICENSE.txt
 #
-##############################################################################
-#
-# Modifications for LaTeX usage: (c) 2002 Andreas Kostyrka
-#
-# Published under the
-# GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
-# or later versions of this LICENSE as published by the
-# Free Software Foundation, Inc.
-# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-# or alternativly under the Zope Public License (ZPL 2.0).
-#
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE
-#
-##############################################################################
+######################################################################
+"""LaTeXClass parses structured text into LaTeX.
 
-from string import join, split, find
-from cgi import escape
-import re, sys
-
-replacement_table =  \
-        [       ("\\", r"\textbackslash"),
-                ("$", r"\$"),
-                ("&", r"\&"),
-                ("%", r"\%"),
-                ("#", r"\#"),
-                ("_", r"\_"),
-                ("{", r"\{"),
-                ("}", r"\}"),
-                ("~", r"\textasciitilde"),
-                ("^", r"\textasciicircum"),
-                ("|", r"\textbar"),
-                ("<", r"\textless"),
-                (">", r"\textgreater") ]
-
-def tex_quote(data, name='(Unknown name)', md={}):
-    """A dtml modifier, that returns quoted text for TeX."""
-    s = data[:]
-    for replacement in replacement_table:
-        s=s.replace(replacement[0],replacement[1])
-    return s
-
+$Id: LaTeXClass.py,v 1.3 2004/03/08 22:11:19 thomas Exp $"""
 
 class LaTeXClass:
+    """LaTeXClass parses structured text into LaTeX."""
 
     element_types={
         '#text': '_text',
@@ -82,19 +40,20 @@ class LaTeXClass:
 
 
     def dispatch(self, doc, level, output):
-        getattr(self, self.element_types[doc.getNodeName()])(doc, level, output)
+        getattr(self, self.element_types[doc.getNodeName()])(
+            doc, level, output)
         
     def __call__(self, doc, level=1, header=1):
-        r=[]
+        r = []
         self.header = header
         self.dispatch(doc, level-1, r.append)
-        return join(r,'')
+        return string.join(r, '')
 
     def _text(self, doc, level, output):
         output(tex_quote((doc.getNodeValue())))
 
     def document(self, doc, level, output):
-        children=doc.getChildNodes()
+        children = doc.getChildNodes()
 
         output("%begin document\n")
 
@@ -104,74 +63,82 @@ class LaTeXClass:
 #                   children[0].getChildNodes()[0].getNodeValue())
             
         for c in children:
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
 
         output("%end document\n")
 
 
     def section(self, doc, level, output):
-        children=doc.getChildNodes()
+        children = doc.getChildNodes()
         for c in children:
-            getattr(self, self.element_types[c.getNodeName()])(c, level+1, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level+1, output)
         
     def sectionTitle(self, doc, level, output):
-        sections=['chapter','section','subsection','subsubsection','paragraph',
-                  'subparagraph']
+        sections = ['chapter', 'section', 'subsection',
+                    'subsubsection', 'paragraph', 'subparagraph']
         
-        output('\%s{' % sections[level])
+        output('\\%s{' % sections[level])
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('}\n')
 
     def description(self, doc, level, output):
-        p=doc.getPreviousSibling()
-        if p is None or  p.getNodeName() is not doc.getNodeName():            
+        p = doc.getPreviousSibling()
+        if p is None or p.getNodeName() is not doc.getNodeName():            
             output('\\begin{description}\n')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
-        n=doc.getNextSibling()
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
+        n = doc.getNextSibling()
         if n is None or n.getNodeName() is not doc.getNodeName():            
             output('\\end{description}\n')
         
     def descriptionTitle(self, doc, level, output):
-        output('\item[')
+        output('\\item[')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('] ')
         
     def descriptionBody(self, doc, level, output):
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('\n')
 
     def bullet(self, doc, level, output):
-        p=doc.getPreviousSibling()
+        p = doc.getPreviousSibling()
         if p is None or p.getNodeName() is not doc.getNodeName():
             output('\n\\begin{itemize}\n')
-        output('\item ')
+        output('\\item ')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
-        n=doc.getNextSibling()
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
+        n = doc.getNextSibling()
         output('\n')
         if n is None or n.getNodeName() is not doc.getNodeName():            
-            output('\n\end{itemize}\n')
+            output('\n\\end{itemize}\n')
 
     def numbered(self, doc, level, output):
-        p=doc.getPreviousSibling()
+        p = doc.getPreviousSibling()
         if p is None or p.getNodeName() is not doc.getNodeName():            
             output('\n\\begin{enumerate}\n')
-        output('\item ')
+        output('\\item ')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
-        n=doc.getNextSibling()
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
+        n = doc.getNextSibling()
         output('\n')
         if n is None or n.getNodeName() is not doc.getNodeName():
             output('\\end{enumerate}\n')
 
     def example(self, doc, level, output):
-        i=0
+        i = 0
         for c in doc.getChildNodes():
-            if i==0:
+            if i == 0:
                 output('\n\\begin{verbatim}\n')
                 output(c.getNodeValue())
                 output('\n\\end{verbatim}\n')
@@ -180,7 +147,6 @@ class LaTeXClass:
                     c, level, output)
 
     def paragraph(self, doc, level, output):
-
         output('\n\n')
         for c in doc.getChildNodes():
             if c.getNodeName() in ['StructuredTextParagraph']:
@@ -193,67 +159,75 @@ class LaTeXClass:
 
     def link(self, doc, level, output):
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('(\\texttt{%s})' % doc.href)
 
     def emphasis(self, doc, level, output):
         output('{\\emph')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('}')
 
     def literal(self, doc, level, output):
         output('\\begin{verbatim}')
         for c in doc.getChildNodes():
-            output(escape(c.getNodeValue()))
+            output(cgi.escape(c.getNodeValue()))
         output('\\end{verbatim}')
 
     def strong(self, doc, level, output):
-        output('\textbf{')
+        output('\\textbf{')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
         output('}')
      
     def underline(self, doc, level, output):
 #        output("<u>")
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
 #        output("</u>")
           
     def innerLink(self, doc, level, output):
  #       output('<a href="#ref');
  #       for c in doc.getChildNodes():
- #           getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+ #           getattr(self, self.element_types[c.getNodeName()])(
+ #               c, level, output)
  #       output('">[')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
  #       output(']</a>')
     
     def namedLink(self, doc, level, output):
 #        output('<a name="ref')
 #        for c in doc.getChildNodes():
-#            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+#            getattr(self, self.element_types[c.getNodeName()])(
+#                c, level, output)
 #        output('">[')
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
 #        output(']</a>')
     
-    def sgml(self,doc,level,output):
+    def sgml(self, doc, level, output):
         for c in doc.getChildNodes():
-            getattr(self, self.element_types[c.getNodeName()])(c, level, output)
+            getattr(self, self.element_types[c.getNodeName()])(
+                c, level, output)
 
     def xref(self, doc, level, output):
 ##        val = doc.getNodeValue()
 ##        output('<a href="#ref%s">[%s]</a>' % (val, val) )
         output(val)
     
-    def table(self,doc,level,output):
-        """
-        A StructuredTextTable holds StructuredTextRow(s) which
-        holds StructuredTextColumn(s). A StructuredTextColumn
-        is a type of StructuredTextParagraph and thus holds
-        the actual data.
-        """
+    def table(self, doc, level, output):
+        """A StructuredTextTable holds StructuredTextRow(s) which
+        holds StructuredTextColumn(s). A StructuredTextColumn is a
+        type of StructuredTextParagraph and thus holds the actual
+        data."""
+        
         output("\\textbf{Tables not yet supported in STX"
                "$\\rightarrow$ \\LaTeX conversions.}")
         return None

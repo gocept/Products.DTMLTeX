@@ -1,17 +1,15 @@
+# -*- coding: utf-8 -*-
+######################################################################
 #
-# (c) 2002 Andreas Kostyrka
+# DTMLTeX - A Zope Product for PS/PDF generation with TeX
+# Copyright (C) 2002 Andreas Kostyrka, 2004 gocept gmbh & co. kg
 #
-# Published under the
-# GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
-# or later versions of this LICENSE as published by the
-# Free Software Foundation, Inc.
-# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# See also LICENSE.txt
 #
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE
-#
+######################################################################
+"""Render the document into PDF using LaTeX.
+
+$Id: stxdocpatch.py,v 1.3 2004/03/08 22:11:19 thomas Exp $"""
 
 from zLOG import *
 
@@ -27,10 +25,10 @@ colors = ["#FFFFFF","#FF9944"]
 
 LaTeX=LaTeXClass.LaTeXClass()
 
-_marker=[]
+_marker = []
 
 def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
-    """ Render the document given a client object, REQUEST mapping,
+    """Render the document given a client object, REQUEST mapping,
     Response, and key word arguments. This produces a LaTeX/PDF Version
     with standard_latex_header and standard_latex_footer."""
 
@@ -50,9 +48,12 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
 
     LOG("DTMLTex",DEBUG,"REQUEST:%r" % REQUEST)
     LOG("DTMLTex",DEBUG,"RESPONSE:%r" % RESPONSE)
-    LOG("DTMLTex",DEBUG,"hasattr(standard_latex_header):%d" % hasattr(self,"standard_latex_header"))
-    LOG("DTMLTex",DEBUG,"hasattr(standard_latex_footer):%d" % hasattr(self,"standard_latex_footer"))
-    if hasattr(self,'standard_latex_header') and hasattr(self,'standard_latex_footer'):
+    LOG("DTMLTex",DEBUG,"hasattr(standard_latex_header):%d" \
+        % hasattr(self,"standard_latex_header"))
+    LOG("DTMLTex",DEBUG,"hasattr(standard_latex_footer):%d" \
+        % hasattr(self,"standard_latex_footer"))
+    if hasattr(self,'standard_latex_header') and \
+           hasattr(self,'standard_latex_footer'):
         r = (
             self.standard_latex_header(self, REQUEST, RESPONSE)
             + r 			
@@ -62,7 +63,8 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
         try:
             LOG("DTMLTex",DEBUG,"before latex run:%r" % r)
             r = "content-type: application/pdf\n\n" + latex( r )
-            if type(r) is not type(''): return r
+            if type(r) is not type(''):
+                return r
 
             if RESPONSE:
                 RESPONSE.setHeader('Content-Type','application/pdf')
@@ -73,8 +75,8 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
             for line in logdata:
                 errline = None
                 htmlline = ""
-                if len(line)>0 and line[0] == "!" or \
-                   line[0:2] == "l.":
+                if len(line) > 0 and line[0] == "!" or \
+                       line[0:2] == "l.":
                     htmlline += "<tr bgcolor=\"#FF9944\">"
                     try:
                         errline = int(line.split(" ")[0][2:])
@@ -84,14 +86,15 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
                 else:
                     htmlline += "<tr>"
                 if errline is not None:
-                    line = "<a href=\"#line%s\">%s</a>" % (errline, line)
+                    line = "<a href=\"#line%s\">%s</a>" \
+                           % (errline, line)
                 htmlline += "<td><code>"+line+"</code></td></tr>\n"
 
                 errlogtable += htmlline
             errlogtable += "</table>" 
 
             texlist = []
-            for item in zip(range(1,len(tf)+1),tf):
+            for item in zip(range(1, len(tf)+1), tf):
                 texlist.append("<tr bgcolor=\"%s\"> <td align=\"right\"><a name=\"line%s\"><code>%s</code></a></td>" \
                                "<td><code>%s</code></td></tr>\n" % \
                                 (colors[item[0] in errorlines], item[0], item[0], item[1]))
@@ -115,4 +118,4 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
     return result
 
 
-std.StructuredDocument.pdf=pdf_method
+std.StructuredDocument.pdf = pdf_method

@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.5 2004/03/08 20:48:35 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.6 2004/03/08 22:11:19 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -30,30 +30,30 @@ def join_dicts(a, b):
     return a
 
 # Colors for the error beautifier
-colors = ["#FFFFFF","#FF9944"]
+colors = ["#FFFFFF", "#FF9944"]
 
-addForm=HTMLFile('dtml/texAdd', globals())
+addForm = HTMLFile('dtml/texAdd', globals())
 
 def add(self, id, title='', file='', REQUEST=None, submit=None):
     """Add a DTML TeX object with the contents of file. If
-    'file' is empty, default document text is used.
-    """
+    'file' is empty, default document text is used."""
+    
     if type(file) is not type(''): file=file.read()
-    ob=DTMLTeX(file, __name__=id)
-    ob.title=title
-    id=self._setObject(id, ob)
+    ob = DTMLTeX(file, __name__=id)
+    ob.title = title
+    id = self._setObject(id, ob)
     if REQUEST is not None:
-        try: u=self.DestinationURL()
-        except: u=REQUEST['URL1']
-        if submit==" Add and Edit ": u="%s/%s" % (u,quote(id))
-        REQUEST.RESPONSE.redirect(u+'/manage_main')
+        try: u = self.DestinationURL()
+        except: u = REQUEST['URL1']
+        if submit == " Add and Edit ": u = "%s/%s" % (u, quote(id))
+        REQUEST.RESPONSE.redirect(u + '/manage_main')
     return ''
 
 class DTMLTeX(DTMLMethod, PropertyManager):
     """DTMLTeX objects are DTML-Methods that produce Postscript or PDF
     using LaTeX."""
 
-    meta_type='DTMLTeX'
+    meta_type = 'DTMLTeX'
 
     security = ClassSecurityInfo()
     
@@ -64,8 +64,12 @@ class DTMLTeX(DTMLMethod, PropertyManager):
 
     defaultfilter = "pdf"
 
-    filters = { 'pdf' : { 'ct':'application/pdf', 'path':'/usr/bin/pdflatex', 'ext':'pdf'},
-                'ps' : {'ct':'application/ps', 'path': os.path.join(os.path.split(__file__)[0],'genlatex'), 'ext':'ps'}}
+    filters = {'pdf': {'ct':'application/pdf',
+                       'path':'/usr/bin/pdflatex', 'ext':'pdf'},
+               'ps': {'ct':'application/ps',
+                      'path': os.path.join(os.path.split(__file__)[0],
+                                           'genlatex'),
+                      'ext':'ps'}}
 
     default_dm_html = \
 r"""\documentclass{article}
@@ -73,11 +77,17 @@ r"""\documentclass{article}
 \end{document}
 """
 
-    security.declareProtected('View management screens', 'manage_editForm', 'manage', 'manage_main', 'manage_uploadForm', 'document_src', 'PrincipiaSearchSource')
-    security.declareProtected('Change DTML Methods', 'manage_edit', 'manage_upload', 'PUT')
-    security.declareProtected('Change proxy roles', 'manage_proxyForm', 'manage_proxy')
+    security.declareProtected('View management screens',
+                              'manage_editForm', 'manage',
+                              'manage_main', 'manage_uploadForm',
+                              'document_src', 'PrincipiaSearchSource')
+    security.declareProtected('Change DTML Methods', 'manage_edit',
+                              'manage_upload', 'PUT')
+    security.declareProtected('Change proxy roles',
+                              'manage_proxyForm', 'manage_proxy')
     security.declareProtected('View', '__call__','')
-    security.declareProtected('FTP access', 'manage_FTPstat','manage_FTPget','manage_FTPlist')
+    security.declareProtected('FTP access', 'manage_FTPstat',
+                              'manage_FTPget', 'manage_FTPlist')
 
     def __init__(self, *nv, **kw):
         DTMLMethod.__init__(self, *nv, **kw)
@@ -87,7 +97,8 @@ r"""\documentclass{article}
         """Lists the Ids of all available filters."""
         return self.filters.keys()
         
-    def __call__(self, client=None, REQUEST=None, RESPONSE=None, **kw):
+    def __call__(self, client=None,
+                 REQUEST=None, RESPONSE=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         Response, and key word arguments."""
 
@@ -106,8 +117,9 @@ r"""\documentclass{article}
         result = apply(HTML.__call__, (self, client, REQUEST), kw)
         
         if client is None or REQUEST.has_key("tex_raw"):
-            # We were either not callen directly, or somebody explicitly
-            # wants to see the tex code, no converted postscript or pdf.
+            # We were either not callen directly, or somebody
+            # explicitly wants to see the tex code, no converted
+            # postscript or pdf.
             return result
         
         # Determine which latex filter to use
@@ -121,7 +133,8 @@ r"""\documentclass{article}
         
         #make the distilled output from TeX
         try:
-            return latex(used_filter['path'], used_filter['ext'], result)
+            return latex(used_filter['path'], used_filter['ext'],
+                         result)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
             tf = texfile.split("\n")
@@ -132,8 +145,8 @@ r"""\documentclass{article}
             for line in logdata:
                 errline = None
                 htmlline = ""
-                if len(line)>0 and line[0] == "!" or \
-                   line[0:2] == "l.":
+                if len(line) > 0 and line[0] == "!" or \
+                       line[0:2] == "l.":
                     htmlline += "<tr bgcolor=\"#FF9944\">"
                     try:
                         errline = int(line.split(" ")[0][2:])
@@ -143,7 +156,8 @@ r"""\documentclass{article}
                 else:
                     htmlline += "<tr>"
                 if errline is not None:
-                    line = "<a href=\"#line%s\">%s</a>" % (errline, line)
+                    line = "<a href=\"#line%s\">%s</a>" \
+                           % (errline, line)
                 htmlline += "<td><code>"+line+"</code></td></tr>\n"
 
                 errlogtable += htmlline
@@ -155,13 +169,14 @@ r"""\documentclass{article}
 r"""<tr bgcolor="%s"> <td align="right">
 <a name="line%s"><code>%s</code></a></td>
 <td><code>%s</code></td></tr>
-"""
-% (colors[item[0] in errorlines], item[0], item[0], item[1]))
+""" \
+% (colors[item[0] in errorlines], item[0], item[0], item[1])
+                )
 
             texlogtable = "<table>" + "\n".join(texlist) + "</table>"
 
             # create output document with error infos
-            errmsg = "<html><title>LaTeX compilation had errors.</title>" + \
+            errmsg = "<html><title>LaTeX compilation had errors.</title>" \
                       "<body><h1>Latex output</h1>You receive this output, "+\
                       "because latex wasn't able to compile your .tex file "+\
                       "correctly. <hr>" + \
@@ -169,7 +184,7 @@ r"""<tr bgcolor="%s"> <td align="right">
                      texlogtable + "<hr><font size=\"2\">generated by "+\
                      "DTMLTeX</font></body></html>"
 
-            REQUEST.RESPONSE.setHeader('Content-Type','text/html')
+            REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
             return errmsg
 
     security.declareProtected('View management screens', 'getFilters')
@@ -210,35 +225,38 @@ def latex(binary, ext, data):
         f.write(data)
         f.close()
 
-        stdout = []             # list of output lines of the command
-        rerun = 1               # flag for running the command again
-        runs = 0                # count of runs already done.
+        stdout = []   # list of output lines of the command
+        rerun = 1     # flag for running the command again
+        runs = 0      # count of runs already done.
 
         while rerun and runs <= 10:
             rerun = 0
 
             try:
-                tmpcmd(binary, (binary,'-interaction=batchmode',tex)) 
+                tmpcmd(binary,
+                       (binary, '-interaction=batchmode', tex)) 
                 runs += 1
             except 'CommandError':
-                stdout = open(log,"r").read().split("\n")
+                stdout = open(log, "r").read().split("\n")
                 raise 'LatexError', (stdout, data)
                 
-            stdout = open(log,"r").read().split("\n")
+            stdout = open(log, "r").read().split("\n")
 
-            # if the output contains hints about rerunning the generation (content etc) we do so ...
+            # if the output contains hints about rerunning the
+            # generation (content etc) we do so ...
             # but at maximum 10 times ...
             for line in stdout:
                 if line.lower().find("no file") != -1:
                     rerun = 1
-                if line == "! Emergency stop." or line == "No pages of output.":
+                if line == "! Emergency stop." or \
+                       line == "No pages of output.":
                     raise 'LatexError', (stdout, data)
         
         f  = open(output, "rb")
         out = f.read()
         f.close()
     finally:
-        for i in glob(base+".*"):
+        for i in glob(base + ".*"):
             unlink(i)
     return out
 
