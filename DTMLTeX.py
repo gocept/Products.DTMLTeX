@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.6 2004/03/08 22:11:19 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.7 2004/03/09 14:33:34 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -21,16 +21,16 @@ from OFS.PropertyManager import PropertyManager
 from AccessControl import ClassSecurityInfo
 from ZODB.PersistentMapping import PersistentMapping
 import os.path
-from string import strip
-
+import re
 from urllib import quote
+from Products.PythonScripts.standard import html_quote
 
 def join_dicts(a, b):
     a.update(b)
     return a
 
-# Colors for the error beautifier
-colors = ["#FFFFFF", "#FF9944"]
+# Color for the error beautifier
+errorcolor = "#fc6"
 
 addForm = HTMLFile('dtml/texAdd', globals())
 
@@ -93,6 +93,7 @@ r"""\documentclass{article}
         DTMLMethod.__init__(self, *nv, **kw)
 
     security.declareProtected('View management screens', 'filterIds')
+    
     def filterIds(self):
         """Lists the Ids of all available filters."""
         return self.filters.keys()
@@ -117,7 +118,7 @@ r"""\documentclass{article}
         result = apply(HTML.__call__, (self, client, REQUEST), kw)
         
         if client is None or REQUEST.has_key("tex_raw"):
-            # We were either not callen directly, or somebody
+            # We were either not called directly, or somebody
             # explicitly wants to see the tex code, no converted
             # postscript or pdf.
             return result
@@ -137,52 +138,95 @@ r"""\documentclass{article}
                          result)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
-            tf = texfile.split("\n")
 
+            # Pick error lines from latex log, mark up log
             errorlines = []
-            # create coloured output with red lines for error infos
-            errlogtable = "<table>"
+            contline = 0
+            errlog = ""
             for line in logdata:
-                errline = None
-                htmlline = ""
-                if len(line) > 0 and line[0] == "!" or \
-                       line[0:2] == "l.":
-                    htmlline += "<tr bgcolor=\"#FF9944\">"
+                line = html_quote(line);
+                
+                if contline:
+                    errlog += "%s</a>\n</strong>" % re.sub(
+                        r"^( *)", r'\1<a href="#line%s">' % errline,
+                        line)
+                    contline = 0
+                    continue
+
+                if line[:2] == "! ":
+                    errlog += "<strong>%s\n</strong>" % line
+                    continue
+
+                if line[:2] == "l.":
+                    errline = None
                     try:
                         errline = int(line.split(" ")[0][2:])
-                        errorlines.append(errline)
                     except:
                         pass
+                    if errline is not None:
+                        errorlines.append(errline)
+                        contline = 1
+                        errlog += \
+                               "<strong><a href=\"#line%s\">%s</a>\n" \
+                               % (errline, line)
+                        continue
+                errlog += "%s\n" % line
+
+            # mark up LaTeX source
+            tf = texfile.strip("\n").split("\n")
+            numberwidth = len("%s" % len(tf))
+            texlog = ""
+            for (lineno, line) in zip(range(1,len(tf)+1),tf):
+                line = html_quote("%*d %s" \
+                                  % (numberwidth, lineno, line))
+                if lineno in errorlines:
+                    texlog += "<strong><a name=\"line%s\">%s</a>\n" \
+                              "</strong>" % (lineno, line)
                 else:
-                    htmlline += "<tr>"
-                if errline is not None:
-                    line = "<a href=\"#line%s\">%s</a>" \
-                           % (errline, line)
-                htmlline += "<td><code>"+line+"</code></td></tr>\n"
-
-                errlogtable += htmlline
-            errlogtable += "</table>" 
-
-            texlist = []
-            for item in zip(range(1,len(tf)+1),tf):
-                texlist.append(
-r"""<tr bgcolor="%s"> <td align="right">
-<a name="line%s"><code>%s</code></a></td>
-<td><code>%s</code></td></tr>
-""" \
-% (colors[item[0] in errorlines], item[0], item[0], item[1])
-                )
-
-            texlogtable = "<table>" + "\n".join(texlist) + "</table>"
+                    texlog += "%s\n" % line
 
             # create output document with error infos
-            errmsg = "<html><title>LaTeX compilation had errors.</title>" \
-                      "<body><h1>Latex output</h1>You receive this output, "+\
-                      "because latex wasn't able to compile your .tex file "+\
-                      "correctly. <hr>" + \
-                     errlogtable +"<hr> <h2> Used latex content </h2>" + \
-                     texlogtable + "<hr><font size=\"2\">generated by "+\
-                     "DTMLTeX</font></body></html>"
+            errmsg = \
+r"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                       "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type"
+          content="text/html; charset=ISO-8859-1">
+    <title>LaTeX compilation had errors.</title>
+    <style type="text/css">
+    <!--
+        strong {
+            display:block;
+            color:black;
+            background-color:%s;
+            }
+    </style>
+</head>
+<body>
+    <h1>There were LaTeX errors.</h1>
+
+    <p>
+      You receive this output because (pdf)latex wasn't able to
+      compile the .tex file generated by this DTMLTeX object
+      correctly. You can find the
+      <a href="#latexfile">generated LaTeX file</a> at the bottom of
+      this page.
+    </p>
+
+    <h2>Latex output (log file)</h2>
+
+<pre>
+%s</pre>
+
+    <h2><a name="latexfile">Generated LaTeX content</a></h2>
+
+<pre>
+%s</pre>
+
+</body>
+</html>
+""" % (errorcolor, errlog, texlog)
 
             REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
             return errmsg
