@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.3 2002/07/24 23:23:04 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.4 2002/07/24 23:30:44 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -214,7 +214,7 @@ def latex(binary, temp, data):
             for line in stdout:
                 if line.lower().find("no file") != -1:
                     rerun = 1
-                if line[0] == "!":
+                if line == "! Emergency stop." or line == "No pages of output.":
                     raise 'LatexError', (stdout, data)
         
         f  = open( pdf, "r" )
@@ -260,6 +260,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.4  2002/07/24 23:30:44  ctheune
+# better error handling of latex log
+#
 # Revision 1.1.1.1.8.3  2002/07/24 23:23:04  ctheune
 # now for the real fix
 #
