@@ -38,13 +38,13 @@ which quotes the value to be TeX content compatible.
 
 EXAMPLES
 
-You can find a (german) example for this tool in example.dtml.
-I used it to automate the generation of certificates for the 
-participiants of my perl courses.
+You can find a example for this tool in example.dtml. It's a letter
+typeset using the KOMA-script letter class scrlttr2 and includes an
+image as well as variables of several types.
 
 CONTACT
 
-For suggestions, ideas, or questions, mail me:
+For suggestions, ideas, or questions, send mail to
 Thomas Lotze <tl@gocept.com>
 
 HISTORY
