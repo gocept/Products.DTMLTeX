@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.16 2004/12/08 15:08:55 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.17 2004/12/22 12:27:41 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -73,14 +73,20 @@ class DTMLTeX(DTMLMethod, PropertyManager):
 
     encoding = "ascii" # Dumb but makes no assumptions about usage of
                        # LaTeX's inputenc package.
-                       # XXX Should be configurable through the ZMI.
 
     tex_raw = False
     tex_filter = "pdf"
 
     deliver = True
     download = False
-    filename = None # Object ID will be used as a fall-back.
+    filename = '' # Object ID will be used as a fall-back.
+
+    _properties = (
+        {'id':'title', 'type':'string'},
+        {'id':'encoding', 'type':'string'},
+        {'id':'filename', 'type':'string'},
+        {'id':'download', 'type':'boolean'}
+        )
 
     default_dm_html = \
 r"""\documentclass{minimal}
@@ -121,16 +127,15 @@ r"""\documentclass{minimal}
                 temp = REQUEST.get(name, temp)
             return kw.get(name, temp)
 
-        #this list takes the temporary-file objects
-        # XXX Yeah, great. Where is it used anyway?
-        tmp = [] 
-        
         kw['document_id'] = self.id
         kw['document_title'] = self.title
-        kw['__temporary_files__'] = tmp
 
         # Resolve DTML.
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
+
+        # If, for some reason, nothing came back, we're done
+        if tex_code == '':
+            return ''
 
         # A comment in DocumentTemplate.DT_String.__call__ indicates
         # that being passed a TemplateDict as the REQUEST is
@@ -192,8 +197,8 @@ r"""\documentclass{minimal}
                 download = TrueOrFalse(get_option('download'))
 
                 filename = get_option('filename')
-                if filename is None:
-                    filename = self.id
+                if filename is None or '' == filename:
+                    filename = self.getId()
 
         # Do it.
         if tex_raw:
