@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.5 2005/01/05 10:09:15 mac Exp $"""
+$Id: texvar.py,v 1.6 2005/01/10 16:55:44 thomas Exp $"""
 
 from ZPublisher.TaintedString import TaintedString
 
@@ -58,9 +58,23 @@ class TEXVar:
         else:
             if not isinstance(val, TaintedString):
                 val = ustr(val)
-            
+
             if args.has_key('tex_quote'):
                 val = replace_map(val, maps['tex_quote'])
+
+                # For replacing characters beyond ASCII (which
+                # math_chars are) we switch to unicode. val will be
+                # decoded under the assumption that it's in system
+                # encoding. If the system encoding is ASCII and val
+                # contains characters beyond that (i.e., in the case
+                # math quoting makes sense in the first place), this
+                # will break, raising an encoding error.
+                # Make sure strings subject to tex_quote are always
+                # unicode.
+                val = unicode(val)
+
+                for c in math_chars:
+                    val = val.replace(c, '\\ensuremath{%s}' % c)
 
             if args.has_key('format_maps'):
                 selected_maps = args['format_maps'].replace(' ', '').split(',')
@@ -71,9 +85,10 @@ class TEXVar:
 
     __call__ = render
 
-maps = {
-    'nl_to_dbs': [('\n', r'\\')],
-    'nl_to_newline': [('\n', r'\newline ')],
+maps = { # Maps need to be lists of pairs as order of application may
+         # be important (e.g., \ has to be quoted first of all).
+    'nl_to_dbs': [('\n', '\\\\\n')],
+    'nl_to_newline': [('\n', '\\newline\n')],
     'tab_to_amp': [('\t', '&')],
     'tex_quote': [
         ("\\", r"\textbackslash{}"),
@@ -84,10 +99,13 @@ maps = {
         ("_", r"\_"),
         ("{", r"\{"),
         ("}", r"\}"),
+        (r"\textbackslash\{\}", r"\textbackslash{}"),
         ("~", r"\textasciitilde{}"),
         ("^", r"\textasciicircum{}"),
         ("|", r"\textbar{}"),
         ("<", r"\textless{}"),
         (">", r"\textgreater{}")
-    ]
+        ]
 }
+
+math_chars = [u'¹', u'²', u'³']
