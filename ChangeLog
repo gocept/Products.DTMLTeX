@@ -1,3 +1,7 @@
+Version 0.5.2
+
+    - Example now demonstrates recursive use of DTMLTeX.
+
 Version 0.5
 
     - Changed file extension handling to head MIME type.
