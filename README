@@ -73,7 +73,7 @@ following features:
 
 - Conversion of Structured Text to LaTeX.
   + <dtml-texvar stxtxt fmt=structured-tex>
-    This adds the formatted LaTeX code for stxtxt.
+    This adds LaTeX code generated from stxtxt.
 - StructuredDocument support.
   If the StructuredDocument product by maik.jablonski@uni-bielefeld.de
   is found, it is patched to support a /pdf method that creates a PDF
