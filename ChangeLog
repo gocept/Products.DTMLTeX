@@ -1,24 +1,17 @@
 
  Version 0.3
 
-    - TeX executable paths are now configurable per instance (default:
-    /usr/bin/pdftex)
+    - Temporary path is now configurable per instance (default: /tmp)
 
-    - Temporary path is not configurable per instance (default: /tmp)
+    - You can define multiple filters (pdftex, pdflatex, latex ...) for each
+    instance now (default are pdflatex and a latex generator script). You can
+    define one as the default, and select another filter on the fly, by
+    defining "tex_filter" in the request. (Like ?tex_filter=ps, or
+    ?tex_filter=pdf). Thanks to Ivo van der Wijk for initial code on this.
 
-    - Content-Type is now configurable per instance (default: application/pdf)
-    and per call (by using the "tex_ct" parameter). If the tex_ct is a string
-    without a "/" in it, the content type will be constructed as the instance
-    content type + the parameter. Example:
+    - Added some security assertions
 
-        Content-Type on instance:   application/pdf
-        tex_ct parameter:           print
-        Resulting Content-Type:     application/pdf-print
-
-    You can use this to bring your browser to print things automatically or
-    something ...
-
-    If the tec_ct has a "/" in it, then it will be the content type.
+    - Cleaned up the management tabs
 
     - Added support for Zope 2.4 (some errors with the monkey patch). Thanks
     to Ivo van der Wijk.
