@@ -18,20 +18,25 @@ editing the DTMLTeX.py file.
 
 USAGE
 
-In the content you can use all DTML-Tags you know. For the special
-case that you want to include a file (e.g. a jpg file) stored in the
-Zope Database as a File-Object, a "create_temp" Method is added to the
-File class. This creates a temporary copy of the File's content in the
-system's tmp directory and inserts the temporary name of the File at
-the place where it was called (e.g.
-<dtml-var "myfile.create_temp()">).
+In the content you can use all DTML-Tags you know. There is a new one,
+dtml-texvar, which is similar to dtml-var except that its available
+modifiers cater for the needs of the LaTeX language. There is a
+modifier called tex_quote which has all LaTeX special characters
+quoted, and a format_maps attribute which takes a comma-separated list
+of names denoting mappings from text formatting to LaTeX formatting
+commands. For instance, nl_to_dbs has all line endings changed to
+double backslashes.
+
+For the special case that you want to include a file (e.g. a jpg file)
+stored in the Zope Database as a File-Object, a "create_temp" Method
+is added to the File class. This creates a temporary copy of the
+File's content in the system's tmp directory and inserts the temporary
+name of the File at the place where it was called (e.g.  <dtml-texvar
+"myfile.create_temp()">).
 
 The temporary copy is erased after a certain amount of time (keyword
 parameter t, defaults to 60 seconds) by a Thread started when calling
 create_temp and sleeping during this time.
-
-Additionally there is a new dtml-var modifier called "tex_quote" 
-which quotes the value to be TeX content compatible.
 
 EXAMPLES
 
@@ -55,7 +60,7 @@ In 2002, Andreas Kostyrka <andreas@kostyrka.priv.at> added the
 following features:
 
 - Conversion of Structured Text to LaTeX.
-  + <dtml-var stxtxt fmt=structured-tex>
+  + <dtml-texvar stxtxt fmt=structured-tex>
     This adds the formatted LaTeX code for stxtxt.
 - StructuredDocument support.
   If the StructuredDocument product by maik.jablonski@uni-bielefeld.de
@@ -71,7 +76,7 @@ BUGS
 
 It is not generally possible to find out for sure whether a given
 DTMLTeX call is the original one made by whoever requested the LaTeX
-or PDF document, or a nested dtml-var call, either direct or through
+or PDF document, or a nested dtml-texvar call, either direct or through
 methods other than DTMLTeX. Therefore it may happen that DTMLTeX tries
 to throw only part of a document at pdflatex, which results in a LaTeX
 error.
