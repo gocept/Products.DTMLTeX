@@ -1,3 +1,16 @@
+Version 0.5
+
+    - Changed file extension handling to head MIME type.
+
+    - Added DTML modifier for escaping newlines.
+
+    - Better error messages.
+
+    - Added tests.
+
+    - Code cleanups.
+
+    - New example.
 
  Version 0.3
 
