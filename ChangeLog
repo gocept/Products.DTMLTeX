@@ -1,7 +1,7 @@
 Version 0.7pre3
 
-    - Added Content-type text/html for Error-Pages, so they will not
-      get the default, but wrong Content-type text/xml.
+    - Set content type for LaTeX error pages to text/html to override the
+      default of text/xml.
 
 Version 0.7pre2
 
