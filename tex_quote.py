@@ -9,10 +9,10 @@
 ######################################################################
 """A DTML modifier that returns text quoted for LaTeX.
 
-$Id: tex_quote.py,v 1.5 2004/03/08 22:11:19 thomas Exp $"""
+$Id: tex_quote.py,v 1.6 2004/09/20 09:38:40 thomas Exp $"""
 
 replacement_table = [
-    ("\\", r"\textbackslash"),
+    ("\\", r"\textbackslash{}"),
     ("$", r"\$"),
     ("&", r"\&"),
     ("%", r"\%"),
@@ -20,11 +20,11 @@ replacement_table = [
     ("_", r"\_"),
     ("{", r"\{"),
     ("}", r"\}"),
-    ("~", r"\textasciitilde"),
-    ("^", r"\textasciicircum"),
-    ("|", r"\textbar"),
-    ("<", r"\textless"),
-    (">", r"\textgreater")]
+    ("~", r"\textasciitilde{}"),
+    ("^", r"\textasciicircum{}"),
+    ("|", r"\textbar{}"),
+    ("<", r"\textless{}"),
+    (">", r"\textgreater{}")]
 
 def tex_quote(data, name='(Unknown name)', md={}):
     """A DTML modifier that returns text quoted for LaTeX."""
