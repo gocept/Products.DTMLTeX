@@ -15,13 +15,13 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.4 2002/07/24 22:50:13 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.5 2002/12/29 16:02:51 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
 import DTMLTeX
 from tex_quote import tex_quote, __init__25, __init__24
-from zLOG import LOG
+from zLOG import LOG,BLATHER
 
 def initialize(context):
     context.registerClass(
@@ -67,3 +67,16 @@ DT_Var.modifiers.append( (tex_quote.__name__,tex_quote) )
 oldinit = DT_Var.Var.__init__
 DT_Var.Var.__init__ = new
 DT_Var.Var.__init__.im_func.func_globals.update(oldinit.im_func.func_globals)
+
+try:
+    import Products.StructuredDocument
+    try:
+        import stxdocpatch
+    except ImportError:
+        LOG('DTMLTeX',BLATHER,"ImportError when applying LaTeX/PDF patch.")
+        import traceback
+        traceback.print_exc()
+except ImportError:
+    LOG('DTMLTeX',BLATHER,"Product Structured Document not found. Not applying LaTeX/PDF patch.")
+    
+import dtvarpatch

@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.5 2002/07/31 12:28:04 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.6 2002/12/29 16:02:51 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -86,10 +86,10 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
     __ac_permissions__=(
     ('View management screens',
      ('manage_editForm', 'manage', 'manage_main', 'manage_uploadForm',
-      'document_src', 'PrincipiaSearchSource')),
+      'document_src', 'PrincipiaSearchSource',)),
     ('Change DTML Methods',     ('manage_edit', 'manage_upload', 'PUT')),
     ('Change proxy roles', ('manage_proxyForm', 'manage_proxy')),
-    ('View', ('__call__', '')),
+    ('View', ('__call__','',)),
     ('FTP access', ('manage_FTPstat','manage_FTPget','manage_FTPlist')),
     )
 
@@ -336,6 +336,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.6  2002/12/29 16:02:51  ctheune
+# Added structured text support
+#
 # Revision 1.1.1.1.8.5  2002/07/31 12:28:04  ctheune
 # Look into the changelog ...
 #
