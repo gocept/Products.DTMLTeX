@@ -10,20 +10,20 @@
 \setkomavar{fromaddress}{Mayfair 1\\01234 Buck city}
 \setkomavar{frombank}{1234567890}
 \setkomavar{fromlogo}{\raisebox{2pt}{%
-    \includegraphics[width=0.5in]{<dtml-var "coin.create_temp()">}}}
+    \includegraphics[width=0.5in]{<dtml-texvar "coin.create_temp()">}}}
 
 \firstfoot{\hrulefill\par
   \footnotesize\centering Bank account: \usekomavar{frombank}}
 
 \begin{document}
 
-\begin{letter}{<dtml-var realname tex_quote>\\
-               <dtml-var address tex_quote newline_to_dbs>}
+\begin{letter}{<dtml-texvar realname tex_quote>\\
+               <dtml-texvar address tex_quote newline_to_dbs>}
 
   \setkomavar{subject}{Fee notification}
-  \opening{Dear <dtml-var salutation tex_quote>,}
+  \opening{Dear <dtml-texvar salutation tex_quote>,}
 
-<dtml-var example_content>
+<dtml-texvar example_content>
 
   \closing{Yours,}
 
