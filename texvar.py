@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.2 2005/01/04 18:49:53 thomas Exp $"""
+$Id: texvar.py,v 1.3 2005/01/05 00:33:56 thomas Exp $"""
 
 from ZPublisher.TaintedString import TaintedString
 
@@ -55,17 +55,17 @@ class TEXVar:
         if not val and val != 0 and args.has_key('null'):
             # check for null (false but not zero, including None, [], '')
             val = args['null']
-
-        if not isinstance(val, TaintedString):
-            val = ustr(val)
+        else:
+            if not isinstance(val, TaintedString):
+                val = ustr(val)
             
-        if self.args.has_key('tex_quote'):
-            val = replace_map(val, maps['tex_quote'])
+            if args.has_key('tex_quote'):
+                val = replace_map(val, maps['tex_quote'])
 
-        if self.args.has_key('format_maps'):
-            selected_maps = self.args['format_maps'].split(',')
-            for map in selected_maps:
-                val = replace_map(val, maps[map])
+            if args.has_key('format_maps'):
+                selected_maps = args['format_maps'].split(',')
+                for map in selected_maps:
+                    val = replace_map(val, maps[map])
 
         return val
 
