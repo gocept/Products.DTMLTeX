@@ -1,3 +1,8 @@
+Version 0.7pre3
+
+    - Added Content-type text/html for Error-Pages, so they will not
+      get the default, but wrong Content-type text/xml.
+
 Version 0.7pre2
 
     - Removed DTML-Var monkeypatch
