@@ -9,7 +9,7 @@
 ######################################################################
 """Render the document into PDF using LaTeX.
 
-$Id: stxdocpatch.py,v 1.3 2004/03/08 22:11:19 thomas Exp $"""
+$Id: stxdocpatch.py,v 1.4 2004/03/09 14:32:16 thomas Exp $"""
 
 from zLOG import *
 
@@ -56,7 +56,7 @@ def pdf_method(self, REQUEST={}, RESPONSE=None, **kw):
            hasattr(self,'standard_latex_footer'):
         r = (
             self.standard_latex_header(self, REQUEST, RESPONSE)
-            + r 			
+            + r                         
             + self.standard_latex_footer(self, REQUEST, RESPONSE)
             )
 

@@ -9,7 +9,7 @@
 ######################################################################
 """LaTeXClass parses structured text into LaTeX.
 
-$Id: LaTeXClass.py,v 1.3 2004/03/08 22:11:19 thomas Exp $"""
+$Id: LaTeXClass.py,v 1.4 2004/03/09 14:32:16 thomas Exp $"""
 
 class LaTeXClass:
     """LaTeXClass parses structured text into LaTeX."""
@@ -59,7 +59,7 @@ class LaTeXClass:
 
 #        if (children and
 #            children[0].getNodeName() == 'StructuredTextSection'):
-#	     output('<head>\n<title>%s</title>\n</head>\n' %
+#            output('<head>\n<title>%s</title>\n</head>\n' %
 #                   children[0].getChildNodes()[0].getNodeValue())
             
         for c in children:
@@ -191,15 +191,15 @@ class LaTeXClass:
 #        output("</u>")
           
     def innerLink(self, doc, level, output):
- #       output('<a href="#ref');
- #       for c in doc.getChildNodes():
- #           getattr(self, self.element_types[c.getNodeName()])(
- #               c, level, output)
- #       output('">[')
+#        output('<a href="#ref');
+#        for c in doc.getChildNodes():
+#            getattr(self, self.element_types[c.getNodeName()])(
+#                c, level, output)
+#        output('">[')
         for c in doc.getChildNodes():
             getattr(self, self.element_types[c.getNodeName()])(
                 c, level, output)
- #       output(']</a>')
+#        output(']</a>')
     
     def namedLink(self, doc, level, output):
 #        output('<a name="ref')
@@ -218,8 +218,8 @@ class LaTeXClass:
                 c, level, output)
 
     def xref(self, doc, level, output):
-##        val = doc.getNodeValue()
-##        output('<a href="#ref%s">[%s]</a>' % (val, val) )
+#        val = doc.getNodeValue()
+#        output('<a href="#ref%s">[%s]</a>' % (val, val) )
         output(val)
     
     def table(self, doc, level, output):
