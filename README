@@ -75,3 +75,10 @@ or PDF document, or a nested dtml-var call, either direct or through
 methods other than DTMLTeX. Therefore it may happen that DTMLTeX tries
 to throw only part of a document at pdflatex, which results in a LaTeX
 error.
+
+Additionally, it is hardly possible to sensibly propagate those errors
+from LaTeX calls on nested parts of documents. The clean thing would
+be to use exceptions, but if we can't know whether we are in a nested
+call, we can't decide whether to propagate the exception or not. (And
+we don't want to raise an exception in the top-level call after all,
+but rather do a nice error page.)
