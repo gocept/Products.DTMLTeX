@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.4 2004/03/08 18:21:51 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.5 2004/03/08 20:48:35 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -244,6 +244,7 @@ def latex(binary, ext, data):
 
 ### Extension to File class follows
 import OFS.Image
+import mimetypes
 
 def delete_tempfile_thread(tmp, t):
     sleep(t)
@@ -252,10 +253,7 @@ def delete_tempfile_thread(tmp, t):
 
 def create_temp(self, t=60):
 
-    if hasattr(self, "suffix"):
-        suffix = self.suffix
-    else:
-        suffix = ""
+    suffix = mimetypes.guess_extension(self.content_type) or ""
 
     base = mktemp()
     os.mkdir(base)
