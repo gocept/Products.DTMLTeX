@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.9.2.2 2004/12/07 11:10:14 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.9.2.3 2004/12/07 11:23:50 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -97,11 +97,11 @@ r"""\documentclass{minimal}
     def filterIds(self):
         """Lists the Ids of all available filters."""
         return self.filters.keys()
-        
-    def __call__(self, client=None,
-                 REQUEST=None, RESPONSE=None, **kw):
+
+    def __call__(self, client=None, REQUEST=None, RESPONSE=None,
+                 **kw):
         """Render the document given a client object, REQUEST mapping,
-        Response, and key word arguments."""
+        and key word arguments."""
 
         #XXX Here we throw away the response passed. Maybe this is
         #asking for trouble - we'll see.
@@ -115,14 +115,14 @@ r"""\documentclass{minimal}
         kw['__temporary_files__'] = tmp
 
         # resolve dtml
-        result = HTML.__call__(self, client, REQUEST, **kw)
+        tex_code = HTML.__call__(self, client, REQUEST, **kw)
         
         if client is None or REQUEST.has_key("tex_raw"):
             # We were either not called directly, or somebody
             # explicitly wants to see the tex code, no converted
             # postscript or pdf.
             RESPONSE.setHeader("Content-type", "application/x-tex")
-            return result
+            return tex_code
         
         # Determine which latex filter to use
         used_filter = REQUEST.get('tex_filter', self.defaultfilter)
@@ -136,7 +136,7 @@ r"""\documentclass{minimal}
         #make the distilled output from TeX
         try:
             return latex(used_filter['path'], used_filter['ext'],
-                         result)
+                         tex_code)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
 
