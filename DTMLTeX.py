@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.9 2004/09/21 19:41:52 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.9.2.1 2004/10/27 09:18:03 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -99,13 +99,13 @@ r"""\documentclass{minimal}
         return self.filters.keys()
         
     def __call__(self, client=None,
-                 REQUEST=None, RESPONSE=None, **kw):
+		 REQUEST=None, RESPONSE=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         Response, and key word arguments."""
 
-        if REQUEST is None:
-            REQUEST = self.REQUEST
-            RESPONSE = REQUEST.RESPONSE
+	#XXX Here we throw away the response passed. Maybe this is
+	#asking for trouble - we'll see.
+	RESPONSE = self.REQUEST.RESPONSE
 
         #this list takes the temporary-file objects
         tmp = [] 
@@ -115,13 +115,13 @@ r"""\documentclass{minimal}
         kw['__temporary_files__'] = tmp
 
         # resolve dtml
-        result = apply(HTML.__call__, (self, client, REQUEST), kw)
+        result = HTML.__call__(self, client, REQUEST, **kw)
         
         if client is None or REQUEST.has_key("tex_raw"):
             # We were either not called directly, or somebody
             # explicitly wants to see the tex code, no converted
             # postscript or pdf.
-            REQUEST.RESPONSE.setHeader("Content-type", "application/x-tex")
+            RESPONSE.setHeader("Content-type", "application/x-tex")
             return result
         
         # Determine which latex filter to use
@@ -131,7 +131,7 @@ r"""\documentclass{minimal}
         used_filter = self.filters[used_filter]
 
         # construct the content-type
-        REQUEST.RESPONSE.setHeader("Content-type", used_filter['ct'])
+        RESPONSE.setHeader("Content-type", used_filter['ct'])
         
         #make the distilled output from TeX
         try:
@@ -229,7 +229,7 @@ r"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 </html>
 """ % (errorcolor, errlog, texlog)
 
-            REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
+            RESPONSE.setHeader('Content-Type', 'text/html')
             return errmsg
 
     security.declareProtected('View management screens', 'getFilters')
