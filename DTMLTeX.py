@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.7 2004/03/09 14:33:34 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.8 2004/03/10 12:06:53 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -72,7 +72,7 @@ class DTMLTeX(DTMLMethod, PropertyManager):
                       'ext':'ps'}}
 
     default_dm_html = \
-r"""\documentclass{article}
+r"""\documentclass{minimal}
 \begin{document}
 \end{document}
 """
@@ -121,6 +121,7 @@ r"""\documentclass{article}
             # We were either not called directly, or somebody
             # explicitly wants to see the tex code, no converted
             # postscript or pdf.
+            REQUEST.RESPONSE.setHeader("Content-type", "application/x-tex")
             return result
         
         # Determine which latex filter to use
