@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.2 2002/07/24 23:21:30 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.3 2002/07/24 23:23:04 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -109,7 +109,7 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
         
         #make the distilled output from TeX
         try:
-            return latex(result)
+            return latex(self.latexbinary, self.temppath, result)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
             tf = texfile.split("\n")
@@ -260,6 +260,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.3  2002/07/24 23:23:04  ctheune
+# now for the real fix
+#
 # Revision 1.1.1.1.8.2  2002/07/24 23:21:30  ctheune
 # wrong call to latex()
 #
