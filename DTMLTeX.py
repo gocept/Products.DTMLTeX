@@ -12,85 +12,118 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.3 2004/03/08 16:31:06 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.4 2004/03/08 18:21:51 thomas Exp $"""
 
-__version__='0.01'
-
-from Globals import HTML, HTMLFile, MessageDialog
+from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
 from OFS.DTMLMethod import DTMLMethod, decapitate
+from OFS.PropertyManager import PropertyManager
+from AccessControl import ClassSecurityInfo
+from ZODB.PersistentMapping import PersistentMapping
+import os.path
+from string import strip
+
 from urllib import quote
 
+def join_dicts(a, b):
+    a.update(b)
+    return a
+
+# Colors for the error beautifier
 colors = ["#FFFFFF","#FF9944"]
 
-tempdir='/tmp'
-LATEX='/usr/bin/pdflatex'
+addForm=HTMLFile('dtml/texAdd', globals())
 
-class DTMLTeX(DTMLMethod):
+def add(self, id, title='', file='', REQUEST=None, submit=None):
+    """Add a DTML TeX object with the contents of file. If
+    'file' is empty, default document text is used.
+    """
+    if type(file) is not type(''): file=file.read()
+    ob=DTMLTeX(file, __name__=id)
+    ob.title=title
+    id=self._setObject(id, ob)
+    if REQUEST is not None:
+        try: u=self.DestinationURL()
+        except: u=REQUEST['URL1']
+        if submit==" Add and Edit ": u="%s/%s" % (u,quote(id))
+        REQUEST.RESPONSE.redirect(u+'/manage_main')
+    return ''
+
+class DTMLTeX(DTMLMethod, PropertyManager):
     """DTMLTeX objects are DTML-Methods that produce Postscript or PDF
     using LaTeX."""
 
     meta_type='DTMLTeX'
 
-    index_html=None # Prevent accidental acquisition
+    security = ClassSecurityInfo()
+    
+    index_html = None # Prevent accidental acquisition
 
-    __ac_permissions__=(
-        ('View management screens',
-         ('manage_editForm', 'manage', 'manage_main',
-          'manage_uploadForm', 'document_src',
-          'PrincipiaSearchSource')),
-        ('Change DTML Methods',
-         ('manage_edit', 'manage_upload', 'PUT')),
-        ('Change proxy roles', ('manage_proxyForm', 'manage_proxy')),
-        ('View', ('__call__', '')),
-        ('FTP access',
-         ('manage_FTPstat','manage_FTPget','manage_FTPlist')),
-        )
+    manage_options = DTMLMethod.manage_options + \
+                     PropertyManager.manage_options
 
+    defaultfilter = "pdf"
 
-    def __call__(self, client=None, REQUEST={}, RESPONSE=None, **kw):
+    filters = { 'pdf' : { 'ct':'application/pdf', 'path':'/usr/bin/pdflatex', 'ext':'pdf'},
+                'ps' : {'ct':'application/ps', 'path': os.path.join(os.path.split(__file__)[0],'genlatex'), 'ext':'ps'}}
+
+    default_dm_html = \
+r"""\documentclass{article}
+\begin{document}
+\end{document}
+"""
+
+    security.declareProtected('View management screens', 'manage_editForm', 'manage', 'manage_main', 'manage_uploadForm', 'document_src', 'PrincipiaSearchSource')
+    security.declareProtected('Change DTML Methods', 'manage_edit', 'manage_upload', 'PUT')
+    security.declareProtected('Change proxy roles', 'manage_proxyForm', 'manage_proxy')
+    security.declareProtected('View', '__call__','')
+    security.declareProtected('FTP access', 'manage_FTPstat','manage_FTPget','manage_FTPlist')
+
+    def __init__(self, *nv, **kw):
+        DTMLMethod.__init__(self, *nv, **kw)
+
+    security.declareProtected('View management screens', 'filterIds')
+    def filterIds(self):
+        """Lists the Ids of all available filters."""
+        return self.filters.keys()
+        
+    def __call__(self, client=None, REQUEST=None, RESPONSE=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         Response, and key word arguments."""
 
+        if REQUEST is None:
+            REQUEST = self.REQUEST
+            RESPONSE = REQUEST.RESPONSE
+
         #this list takes the temporary-file objects
         tmp = [] 
-
-        kw['document_id']   =self.id
-        kw['document_title']=self.title
-        kw['__temporary_files__'] =tmp
-
+        
+        kw['document_id'] = self.id
+        kw['document_title'] = self.title
+        kw['__temporary_files__'] = tmp
 
         # resolve dtml
-        r= apply(HTML.__call__, (self, client, REQUEST), kw)
+        result = apply(HTML.__call__, (self, client, REQUEST), kw)
+        
+        if client is None or REQUEST.has_key("tex_raw"):
+            # We were either not callen directly, or somebody explicitly
+            # wants to see the tex code, no converted postscript or pdf.
+            return result
+        
+        # Determine which latex filter to use
+        used_filter = REQUEST.get('tex_filter', self.defaultfilter)
+        if not used_filter in self.filterIds():
+            used_filter = self.defaultfilter
+        used_filter = self.filters[used_filter]
 
-        # Verify the authenticated user object.
-        #if REQUEST.has_key('AUTHENTICATED_USER'):
-        #    verify_watermark(REQUEST['AUTHENTICATED_USER'])
-
-        if client is None:
-            # Called as subtemplate, so don't need error propigation!
-            # Give a reference to this only
-            # r = "<a href='" + self.__name__ + "'>" + str(self.title)
-            #     + "</a>"
-            return r
-
-        #make Postscript from TeX
+        # construct the content-type
+        REQUEST.RESPONSE.setHeader("Content-type", used_filter['ct'])
+        
+        #make the distilled output from TeX
         try:
-            r= latex( r )
-            r="content-type: application/pdf\n\n" + r
-
-            if type(r) is not type(''): return r
-
-            if RESPONSE is None: return r
-
-            # Ick.  I don't like this. But someone can override it
-            # with a header if they have to.
-            hh=RESPONSE.headers.has_key
-            if not (hh('content-type') or hh('Content-Type')):
-                c, e=guess_content_type(self.__name__, r)
-                RESPONSE.setHeader('Content-Type', c)
-            return decapitate(r, RESPONSE)
+            return latex(used_filter['path'], used_filter['ext'], result)
         except 'LatexError', (logdata, texfile):
+            # The next lines are the Code-o-Beautifier *G
             tf = texfile.split("\n")
 
             errorlines = []
@@ -110,8 +143,7 @@ class DTMLTeX(DTMLMethod):
                 else:
                     htmlline += "<tr>"
                 if errline is not None:
-                    line = "<a href=\"#line%s\">%s</a>" % \
-                           (errline, line)
+                    line = "<a href=\"#line%s\">%s</a>" % (errline, line)
                 htmlline += "<td><code>"+line+"</code></td></tr>\n"
 
                 errlogtable += htmlline
@@ -119,142 +151,126 @@ class DTMLTeX(DTMLMethod):
 
             texlist = []
             for item in zip(range(1,len(tf)+1),tf):
-                texlist.append("<tr bgcolor=\"%s\"> <td align=\"right\"><a name=\"line%s\"><code>%s</code></a></td>" \
-                               "<td><code>%s</code></td></tr>\n" % \
-                                (colors[item[0] in errorlines],
-                                 item[0], item[0], item[1]))
+                texlist.append(
+r"""<tr bgcolor="%s"> <td align="right">
+<a name="line%s"><code>%s</code></a></td>
+<td><code>%s</code></td></tr>
+"""
+% (colors[item[0] in errorlines], item[0], item[0], item[1]))
 
             texlogtable = "<table>" + "\n".join(texlist) + "</table>"
 
             # create output document with error infos
             errmsg = "<html><title>LaTeX compilation had errors.</title>" + \
-                      "<body><h1>Latex output</h1>You receive this output, because latex wasn't able to compile your .tex file correctly. <hr>" + \
+                      "<body><h1>Latex output</h1>You receive this output, "+\
+                      "because latex wasn't able to compile your .tex file "+\
+                      "correctly. <hr>" + \
                      errlogtable +"<hr> <h2> Used latex content </h2>" + \
-                     texlogtable + "<hr><font size=\"2\">generated by DTMLLatex / pdftex</font></body></html>"
+                     texlogtable + "<hr><font size=\"2\">generated by "+\
+                     "DTMLTeX</font></body></html>"
 
-            # append the uses text document
-            RESPONSE.setHeader('Content-Type','text/html')
+            REQUEST.RESPONSE.setHeader('Content-Type','text/html')
             return errmsg
 
-        default_dm_html="""\\documentclass{article}
-\\begin{document}
-\\end{document}
-"""
+    security.declareProtected('View management screens', 'getFilters')
 
-addForm=HTMLFile('dtml/texAdd', globals())
+    def getFilters(self, REQUEST=None):
+        """Returns a list of all filters."""
+        list = [join_dicts(value, {'mapid':id})
+                for (id, value) in self.filters.items()]
+        return list
 
-def add(self, id, title='', file='', REQUEST=None, submit=None):
-    """Add a DTMLTeX object with the contents of file. If
-    'file' is empty, default document text is used.
-    """
-    if type(file) is not type(''): file=file.read()
-    if not file: file=default_dm_html
-    ob=DTMLTeX(file, __name__=id)
-    ob.title=title
-    id=self._setObject(id, ob)
-    if REQUEST is not None:
-        try: u=self.DestinationURL()
-        except: u=REQUEST['URL1']
-        if submit==" Add and Edit ": u="%s/%s" % (u,quote(id))
-        REQUEST.RESPONSE.redirect(u+'/manage_main')
-    return ''
+InitializeClass(DTMLTeX)
 
 #### This is for running the latex-command
-from os import chdir, execv, fork, waitpid, unlink
+from os import chdir, spawnv, waitpid, unlink, P_WAIT
 from thread import start_new_thread
 from time import sleep
 from tempfile import mktemp
 from glob import glob
 import tempfile
 
-tempfile.tempdir = tempdir
 
-def tmpcmd ( path, args ):
-    pid= fork()
-    if pid==0:
-        #we are the child
-        chdir( tempfile.tempdir )
-        execv( path, args )
-    elif pid<0:
-        #something goes wrong
-        raise 'cant fork for command'
-    if waitpid(pid,0)[1]:
+def tmpcmd (path, args):
+    chdir(tempfile.gettempdir())
+    if spawnv(P_WAIT, path, args):
         raise 'CommandError'
         pass
     return
 
-def latex( data ):
+def latex(binary, ext, data):
     try:
         base = mktemp()
-        tex  = base + ".tex"
-        pdf  = base + ".pdf"
-        log  = base + ".log" 
-
+        tex = base + ".tex"
+        output = base + ".%s" % ext
+        log = base + ".log" 
+        
         # create temporary tex file
-        f= open( tex, "w" )
-        f.write( data )
+        f = open(tex, "w")
+        f.write(data)
         f.close()
 
-        stdout = []     # list of output lines of the command
-        rerun = 1       # flag for running the command again
-        runs = 0        # count of runs already done.
+        stdout = []             # list of output lines of the command
+        rerun = 1               # flag for running the command again
+        runs = 0                # count of runs already done.
 
         while rerun and runs <= 10:
             rerun = 0
 
             try:
-                tmpcmd(LATEX, (LATEX,'-interaction=batchmode',tex)) 
+                tmpcmd(binary, (binary,'-interaction=batchmode',tex)) 
                 runs += 1
             except 'CommandError':
                 stdout = open(log,"r").read().split("\n")
                 raise 'LatexError', (stdout, data)
+                
             stdout = open(log,"r").read().split("\n")
 
-            # if the output contains hints about rerunning the
-            # generation (content etc) we do so ...
+            # if the output contains hints about rerunning the generation (content etc) we do so ...
             # but at maximum 10 times ...
             for line in stdout:
                 if line.lower().find("no file") != -1:
                     rerun = 1
-
-        f  = open( pdf, "r" )
-        out= f.read()
+                if line == "! Emergency stop." or line == "No pages of output.":
+                    raise 'LatexError', (stdout, data)
+        
+        f  = open(output, "rb")
+        out = f.read()
         f.close()
-
     finally:
         for i in glob(base+".*"):
-            unlink( i )
+            unlink(i)
     return out
 
 ### Extension to File class follows
 import OFS.Image
 
-def delete_tempfile_thread( tmp, t ):
-    sleep( t )
-    unlink( tmp )
+def delete_tempfile_thread(tmp, t):
+    sleep(t)
+    unlink(tmp)
     return
 
-def create_temp( self , t=60, sfx=0 ):
-    if hasattr( self, 'suffix' ):
-        suffix= self.suffix
+def create_temp(self, t=60):
+
+    if hasattr(self, "suffix"):
+        suffix = self.suffix
     else:
-        suffix= ''
+        suffix = ""
+
     base = mktemp()
-    tmp  = base + suffix
-    f= open( tmp, "w" )
-    data= self.data
+    os.mkdir(base)
+    tmp = base + "/file" + suffix
+    f = open(tmp, "w")
+    data = self.data
     if type(data) is not type(''):
         while data:
             f.write(data.data)
-            data= data.next
+            data = data.next
     else:
-        f.write( data )
+        f.write(data)
     f.close()
-    #this removes the temporary file in t seconds
-    start_new_thread( delete_tempfile_thread, (tmp,t) )
-    if sfx:
-        return tmp
-    else:
-        return base
+    # this removes the temporary file in t seconds
+    #    start_new_thread(delete_tempfile_thread, (tmp, t))
+    return tmp
 
-OFS.Image.File.create_temp= create_temp
+OFS.Image.File.create_temp = create_temp

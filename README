@@ -43,12 +43,9 @@ system's tmp directory and inserts the temporary name of the File at
 the place where it was called (e.g.
 <dtml-var "myfile.create_temp()">).
 
-If the File Object has the property "suffix", this is added to the
-filename on disk, but not on that rendered (if you don't want the
-latter, you can use the keyword-parameter sfx=1). The temporary copy
-is erased after a certain amount of time (keyword parameter t,
-defaults to 60 seconds) by a Thread started when calling create_temp
-and sleeping during this time.
+The temporary copy is erased after a certain amount of time (keyword
+parameter t, defaults to 60 seconds) by a Thread started when calling
+create_temp and sleeping during this time.
 
 Additionally there is a new dtml-var modifier called "tex_quote" 
 which quotes the value to be TeX content compatible.

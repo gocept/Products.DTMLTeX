@@ -7,18 +7,16 @@ working, do the following:
 Create a new folder in your Zope instance. Call it "example_folder".
 
 Create a new DTMLTeX object in it. Call it "example_file". Upload the
-	file example.dtml to its content.
+file example.dtml to its content.
 
 Give "example_folder" the following properties:
 	realname="John Doe" (string)
-	address="Example road 007\\12345 Foo town" (text)
+	address="Example road 007<newline>12345 Foo town" (text)
 	salutation="Mr Doe" (string)
 	amount=42.0 (float)
 	duration=7 (int)
 
 Create a new File object in the example_folder. Call it "coin" and
-	upload the file coin.png to its content.
-
-Give "coin" the property suffix=".png" (string).
+upload the file coin.png to its content.
 
 View the example_file object.

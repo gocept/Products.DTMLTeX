@@ -1,0 +1,6 @@
+#!/bin/sh
+# This script generates Postscript from latex incorporated into one command
+
+base=`basename $2 .tex`
+latex $@ && dvips -f > $base.ps < $base.dvi
+

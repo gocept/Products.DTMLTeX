@@ -8,9 +8,7 @@
 #
 ######################################################################
 
-$Id: texAdd.dtml,v 1.3 2004/03/08 16:31:06 thomas Exp $
-
-version = 0.01
+$Id: texAdd.dtml,v 1.4 2004/03/08 18:21:51 thomas Exp $
 
 </dtml-comment>
 <dtml-var manage_page_header>

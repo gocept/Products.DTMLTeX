@@ -1,0 +1,40 @@
+
+ Version 0.3
+
+    - Added Windows compatibility by using spawnv instead of fork, using
+      tempfile in a more generic fashion and using explicit binary mode for
+      reading a file.
+
+    - Some security enhancements (no paths TTW anymore, clean 2.4 security
+      machinery upgrade)
+
+    - Fixed a bug with newer Zopes (invalid amount of parameters for
+      __call__). Thanks to Frank Poetzsch-Heffter.
+
+    - Added support for structured Text. Thanks to Andres Kostyrka.
+
+    - Fixed a bug with the ZODB File support. Thanks to Frank
+      Poetzsch-Heffter.
+
+    - Temporary path is now configurable per instance (default: /tmp)
+
+    - You can define multiple filters (pdftex, pdflatex, latex ...) for the
+      class (default are pdflatex and a latex generator script). You can
+      define one as the default, and select another filter on the fly, by
+      defining "tex_filter" in the request. (Like ?tex_filter=ps, or
+      ?tex_filter=pdf). Thanks to Ivo van der Wijk for initial code on this.
+
+    - Added some security assertions
+
+    - Cleaned up the management tabs
+
+    - Added support for Zope 2.5, 2.6 and 2.7
+
+    - Added support for Zope 2.4 (some errors with the monkey patch). Thanks
+      to Ivo van der Wijk.
+
+    - You can optionally view the rendered DTML code instead of passing it to
+      the TeX interpreter, by putting "tex_raw" in the Request. 
+
+    - Some code cleanups.
+
