@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.6 2003/11/17 18:49:28 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.7 2003/12/01 13:32:12 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
@@ -79,6 +79,6 @@ try:
         import traceback
         traceback.print_exc()
 except ImportError:
-    LOG('DTMLTeX', WARNING, "Product `Structured Document` not found. Not applying STX patch.")
+    LOG('DTMLTeX', INFO, "Product `Structured Document` not found. Not applying STX patch.")
     
 import dtvarpatch
