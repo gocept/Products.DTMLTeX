@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.2 2002/07/24 22:41:11 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.3 2002/07/24 22:49:11 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
@@ -43,17 +43,18 @@ LOG('DTMLTeX',0, 'Applying tex_quote DTML monkeypatch.')
 # We need two different patches for 2.4.X and 2.5.X
 from App import version_txt
 
-version = version_txt.getZopeVersion()
-_version = str(version[0]) + "." + str(version[1])
+if hasattr(version_txt, "getZopeVersion"):
+    # Older Zope Versions ( <2.5 don't have this function )
+    version = version_txt.getZopeVersion()
+    _version = str(version[0]) + "." + str(version[1])
+else:
+    version = [2,4]
 
 if version[0] != 2:
     LOG("DTMLTeX", 500, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
     raise "CompatibilityError"
-elif version[1] < 4:
-    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( < 2.4 ). Trying to apply patch for Zope 2.4 maybe this works.")
-    new = __init__24
-elif version[1] == 4:
-    new = __init__24
+elif version[1] <= 4:
+    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( <= 2.4 ). Trying to apply patch for Zope 2.4 maybe this works. (IF this is a 2.4, this will work, but i can't determine earlier versions.)")
 elif version[1] == 5:
     new = __init__25
 elif version[1] > 5:
