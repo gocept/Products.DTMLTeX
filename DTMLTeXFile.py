@@ -15,10 +15,10 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeXFile.py,v 1.1.2.1 2003/07/17 10:35:17 ctheune Exp $
+# $Id: DTMLTeXFile.py,v 1.1.2.2 2003/09/15 16:27:42 ctheune Exp $
 """DTML TeX objects.
 
-$Id: DTMLTeXFile.py,v 1.1.2.1 2003/07/17 10:35:17 ctheune Exp $"""
+$Id: DTMLTeXFile.py,v 1.1.2.2 2003/09/15 16:27:42 ctheune Exp $"""
 
 #from DocumentTemplate.DT_String import File
 from App.special_dtml import ClassicHTMLFile
@@ -28,10 +28,8 @@ class DTMLTeXFile(ClassicHTMLFile, DTMLTeX):
     """docstring"""
 
     def __init__(self, *nv, **kw):
-        ClassicHTMLFile.__init__(self, *nv, **kw)
         DTMLTeX.__init__(self, *nv, **kw)
-    
-    def __call__(self, *nv, **kw):
-        ClassicHTMLFile.__call__(self, *nv, **kw)
-        return DTMLTeX.__call__(self, *nv, **kw)
+        ClassicHTMLFile.__init__(self, *nv, **kw)
 
+    def __call__(self, *nv, **kw):
+        return DTMLTeX.__call__(self, *nv, **kw)

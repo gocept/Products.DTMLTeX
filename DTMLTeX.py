@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.8 2003/07/17 10:35:17 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.9 2003/09/15 16:27:42 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -119,9 +119,13 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
         """Lists the Ids of all available filters."""
         return self.filters.keys()
         
-    def __call__(self, client=None, REQUEST={}, RESPONSE=None, **kw):
+    def __call__(self, client=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         Response, and key word arguments."""
+
+        REQUEST = self.REQUEST
+        RESPONSE = REQUEST.RESPONSE
+
         #this list takes the temporary-file objects
         tmp = [] 
         
@@ -337,6 +341,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.9  2003/09/15 16:27:42  ctheune
+#  - added support for DTMLTeXFile
+#
 # Revision 1.1.1.1.8.8  2003/07/17 10:35:17  ctheune
 #  - added new DTMLTeXFile
 #  - fixed RESPONSE reference in DTMLTeX.py
