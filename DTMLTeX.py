@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.24 2005/01/11 22:08:24 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.25 2005/01/26 12:25:18 mac Exp $"""
 
 # Python imports
 import os.path
@@ -298,7 +298,8 @@ def latex(binary, ext, tex_code):
                           (binary, '-interaction=batchmode', texfile)):
                     raise 'CommandError'
                 runs += 1
-            except 'CommandError':
+            except ('CommandError', OSError):
+                # OSError occurs on Win when a file (e.g. image) is not found
                 logdata = file(log).readlines()
                 raise 'LatexError', logdata
                 
@@ -335,7 +336,7 @@ def compose_errmsg(logdata, tex_code):
         line = html_quote(line);
                 
         if contline:
-            stripped_line = lstrip(line)
+            stripped_line = line.lstrip()
             whitespace = line[:len(line)-len(stripped_line)]
             errlog += '%s<a href="#line%s">%s</a>\n</strong>' % \
                 (whitespace, errline, stripped_line)
@@ -343,7 +344,7 @@ def compose_errmsg(logdata, tex_code):
             continue
 
         if line[:2] == "! ":
-            errlog += "<strong>%s\n</strong>" % line
+            errlog += "<strong>%s</strong>" % line
             continue
 
         if line[:2] == "l.":
@@ -357,11 +358,11 @@ def compose_errmsg(logdata, tex_code):
                 errorlines.append(errline)
                 contline = 1
                 errlog += \
-                    "<strong><a href=\"#line%s\">%s</a>\n" \
-                    % (errline, line)
+                    "<strong><a href=\"#line%s\">%s</a>" \
+                    % (errline, line.rstrip())
                 continue
 
-        errlog += "%s\n" % line
+        errlog += "%s" % line
 
     # mark up LaTeX source
     tf = tex_code.split("\n")
