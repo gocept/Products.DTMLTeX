@@ -1,0 +1,49 @@
+DTMLTeX
+
+This is DTMLTeX, a Zope Product, that is similar to the DTML Method,
+but which gets send through pdftex (you may replace this to the default
+latex/dvips procuedure) and sends you a pdf file as view.
+
+This release is based on the Zope Product found on zope.org, created
+originally by Marian Kelc.
+
+PREREQUISITES
+
+pdftex
+
+pdftex should be installed in /usr/bin, otherwise change dtmltex.py 
+This mean, you must have installed this tool. The package assumes the 
+binaries in /usr/bin/... - you can change this behavior with editing the
+DTMLTeX.py File. 
+
+In the content you can use all DTML-Tags you know. For the special
+case, you want to include a file (e.g. an eps-file) that is stored in
+the Zope Database as a File-Object, a "create_temp" Method is added to
+the File class. This creates a temporary copy of the Files content in
+the systems tmp-directory and inserts the temporary name of the File
+at the place, where it was called 
+(e.g. <dtml-var "myfile.create_temp()">).  
+
+If the File Object has the property "suffix", this is added to the
+filename on disk, but not on that rendered (if you dont want the
+latter, you can use the keyword-parameter sfx=1).  The temporary copy
+is erased after a certain amount of time (keyword-parameter t,
+defaults to 60 seconds) through a Thread, that was started at call of
+create_temp and keeps sleeping for this time.
+
+Additionally there is a new dtml-var modifier called "tex_quote" 
+which quotes the value to be TeX content compatible.
+
+You can find a (german) example for this tool in example.dtml.
+I used it to automate the generation of certificates for the 
+participiants of my perl-courses.
+
+For suggestions or ideas or questions, mail me:
+ct@gocept.com
+
+HISTORY
+
+This Product was first developed by Marian Kelc in 1999. Due to
+changes in Zope and lack of time from Marian, the new maintainer
+is Christian Theune <ct@gocept.com>.
+

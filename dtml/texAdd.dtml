@@ -1,0 +1,70 @@
+<dtml-comment>
+#    DTMLTeX - A Zope Product for PS/PDF generation with TeX
+#    Copyright (C) 1999 Marian Kelc, 2002 gocept gmbh & co. kg
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#   version 2.1 of the License, or (at your option) any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with this library; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# $Id: texAdd.dtml,v 1.1 2002/05/30 13:37:18 ctheune Exp $
+</dtml-comment>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML lang="en">
+<HEAD>
+<TITLE>Add DTML TeX Document</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" LINK="#000099" VLINK="#555555">
+<H2>Add DTML Document</H2>
+
+<P>
+A DTML TeX Object is used to hold text/latex content. 
+On call, the Tex-Source is sent trough latex an a
+PostScript-Output is generated.
+A DTML document can contain
+<a href="http://www.zope.org/Documentation/Guides/DTML/">DTML
+scripting tags</a>.
+</P>
+
+<P>
+You may create a new DTML TeX Object using the form below. 
+You may also choose to upload an existing html file from your
+local computer by clicking the <I>Browse</I> button.
+</P>
+
+<FORM ACTION="add" METHOD="POST"
+      ENCTYPE="multipart/form-data">
+<TABLE CELLSPACING="2">
+<TR>
+  <TH ALIGN="LEFT" VALIGN="TOP">Id</TH>
+  <TD ALIGN="LEFT" VALIGN="TOP"><INPUT TYPE="TEXT" NAME="id" SIZE="40"></TD>
+</TR>
+<TR>
+  <TH ALIGN="LEFT" VALIGN="TOP"><EM>Title</EM></TH>
+  <TD ALIGN="LEFT" VALIGN="TOP"><INPUT TYPE="TEXT" NAME="title" SIZE="40"></TD>
+</TR>
+<TR>
+  <TH ALIGN="LEFT" VALIGN="TOP"><EM><STRONG>File</STRONG></EM></TD>
+  <TD ALIGN="LEFT" VALIGN="TOP">
+     <INPUT TYPE="file" NAME="file:string" SIZE="25" VALUE="">
+  </TD>
+</TR>
+<TR><TH></TH>
+    <TD>
+       <INPUT TYPE="SUBMIT" VALUE=" Add ">
+       <INPUT TYPE="SUBMIT" VALUE=" Add and Edit " NAME="submit">
+    </TD>
+</TR>
+</TABLE>
+</FORM>
+</BODY></HTML>
+
