@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.6 2002/12/29 16:02:51 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.7 2003/03/12 06:50:42 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -315,7 +315,8 @@ def create_temp( self , t=60, sfx=0 ):
     else:
         suffix= ''
     base = mktemp()
-    tmp  = base + suffix
+    os.mkdir(base)
+    tmp  = base + "/data."+suffix
     f= open( tmp, "w" )
     data= self.data
     if type(data) is not type(''):
@@ -336,6 +337,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.7  2003/03/12 06:50:42  ctheune
+# fixed bug with creating external tempfiles for graphics
+#
 # Revision 1.1.1.1.8.6  2002/12/29 16:02:51  ctheune
 # Added structured text support
 #

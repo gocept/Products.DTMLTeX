@@ -3,6 +3,9 @@
 
     - Added support for structured Text. Thanks to Andres Kostyrka.
 
+    - Fixed a bug with the ZODB File support. Thanks to Frank
+      Poetzsch-Heffter.
+
     - Temporary path is now configurable per instance (default: /tmp)
 
     - You can define multiple filters (pdftex, pdflatex, latex ...) for each
