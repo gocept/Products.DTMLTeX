@@ -1,3 +1,12 @@
+Version 0.6
+
+    - Encoding, filename and download attributes are now configurable
+      through the ZMI.
+
+    - Improved latex running behaviour.
+
+    - Some code clean-up.
+
 Version 0.6pre2
 
     - Fixed nesting yet again.
