@@ -12,8 +12,14 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.18 2004/12/22 13:48:40 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.19 2005/01/04 15:33:41 ctheune Exp $"""
 
+# Python imports
+import os.path
+import re
+from urllib import quote
+
+# Zope imports
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
 from OFS.DTMLMethod import DTMLMethod, decapitate
@@ -21,10 +27,10 @@ from OFS.PropertyManager import PropertyManager
 from AccessControl import ClassSecurityInfo
 from ZODB.PersistentMapping import PersistentMapping
 from DocumentTemplate.DT_Util import TemplateDict
-import os.path
-import re
-from urllib import quote
 from Products.PythonScripts.standard import html_quote
+
+# Sibling imports
+from Products.DTMLTeX import texvar
 
 def join_dicts(a, b):
     a.update(b)
@@ -57,6 +63,11 @@ class DTMLTeX(DTMLMethod, PropertyManager):
     meta_type = 'DTMLTeX'
 
     security = ClassSecurityInfo()
+
+    # Add texvar
+    commands = {}
+    commands.update(DTMLMethod.commands)
+    commands['texvar'] = texvar.TEXVar
     
     index_html = None # Prevent accidental acquisition
 

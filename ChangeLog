@@ -1,3 +1,8 @@
+Version 0.7
+
+	-	Removed DTML-Var monkeypatch
+	-	Added new "texvar" DTML command.
+
 Version 0.6
 
     - Encoding, filename and download attributes are now configurable
