@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.9.2.3 2004/12/07 11:23:50 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.9.2.4 2004/12/07 16:06:55 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -103,10 +103,6 @@ r"""\documentclass{minimal}
         """Render the document given a client object, REQUEST mapping,
         and key word arguments."""
 
-        #XXX Here we throw away the response passed. Maybe this is
-        #asking for trouble - we'll see.
-        RESPONSE = self.REQUEST.RESPONSE
-
         #this list takes the temporary-file objects
         tmp = [] 
         
@@ -117,10 +113,16 @@ r"""\documentclass{minimal}
         # resolve dtml
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
         
-        if client is None or REQUEST.has_key("tex_raw"):
-            # We were either not called directly, or somebody
-            # explicitly wants to see the tex code, no converted
-            # postscript or pdf.
+        # Interpreting the DTMLMethod code: "client is None" means
+        # this is a subtemplate so no further processing and no HTTP
+        # headers are needed. On "RESPONSE is None", a DTMLMethod just
+        # returns the code, too.
+        if client is None or RESPONSE is None:
+            return tex_code
+
+        if REQUEST.has_key("tex_raw"):
+            # Somebody explicitly wants to see the tex code, not a
+            # typeset postscript or pdf document.
             RESPONSE.setHeader("Content-type", "application/x-tex")
             return tex_code
         
