@@ -17,11 +17,11 @@
 
 \begin{document}
 
-\begin{letter}{<dtml-var realname>\\
-               <dtml-var "string.replace(address, '\n', r'\\')">}
+\begin{letter}{<dtml-var realname tex_quote>\\
+               <dtml-var address tex_quote newline_to_dbs>}
 
   \setkomavar{subject}{Fee notification}
-  \opening{Dear <dtml-var salutation>,}
+  \opening{Dear <dtml-var salutation tex_quote>,}
 
   please note that you have the honour of receiving this example
   letter. It would be appropriate for you to express your gratitude by

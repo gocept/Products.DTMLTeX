@@ -9,10 +9,11 @@
 ######################################################################
 """DTMLTeX initialization.
 
-$Id: __init__.py,v 1.3 2004/03/08 18:21:51 thomas Exp $"""
+$Id: __init__.py,v 1.4 2004/03/08 18:43:38 thomas Exp $"""
 
 import DTMLTeX
-from tex_quote import tex_quote, __init__25, __init__24
+from tex_quote import tex_quote, newline_to_dbs, \
+     __init__25, __init__24
 from zLOG import *
 
 def initialize(context):
@@ -54,6 +55,7 @@ elif version[1] > 7:
 from DocumentTemplate import DT_Var
 
 DT_Var.modifiers.append((tex_quote.__name__, tex_quote))
+DT_Var.modifiers.append((newline_to_dbs.__name__, newline_to_dbs))
 oldinit = DT_Var.Var.__init__
 DT_Var.Var.__init__ = new
 DT_Var.Var.__init__.im_func.func_globals.update(oldinit.im_func.func_globals)

@@ -9,7 +9,7 @@
 ######################################################################
 """A DTML modifier that returns text quoted for LaTeX.
 
-$Id: tex_quote.py,v 1.3 2004/03/08 18:21:51 thomas Exp $"""
+$Id: tex_quote.py,v 1.4 2004/03/08 18:43:38 thomas Exp $"""
 
 replacement_table = [("\\", r"\textbackslash"),
                      ("$", r"\$"),
@@ -32,6 +32,11 @@ def tex_quote(data, name='(Unknown name)', md={}):
         s = s.replace(replacement[0], replacement[1])
     return s
 
+def newline_to_dbs(data, name='(Unknown name)', md={}):
+    """A DTML modifier that changes newlines to LaTeX linebreaks."""
+    s = data[:].replace("\n", r"\\")
+    return s
+
 def __init__25(self, args, fmt='s'):
         if args[:4]=='var ': args=args[4:]
         args = parse_params(args, name='', lower=1, upper=1, expr='',
@@ -39,7 +44,8 @@ def __init__25(self, args, fmt='s'):
                             size=0, etc='...', thousands_commas=1,
                             html_quote=1, url_quote=1, sql_quote=1,
                             url_quote_plus=1, missing='',
-                            newline_to_br=1, url=1, tex_quote=1)
+                            newline_to_br=1, url=1,
+                            tex_quote=1, newline_to_dbs=1)
         self.args=args
 
         self.modifiers=tuple(
@@ -69,7 +75,8 @@ def __init__24(self, args, fmt='s'):
                             size=0, etc='...', thousands_commas=1,
                             html_quote=1, url_quote=1, sql_quote=1,
                             url_quote_plus=1, missing='',
-                            newline_to_br=1, url=1, tex_quote=1)
+                            newline_to_br=1, url=1,
+                            tex_quote=1, newline_to_dbs=1)
         self.args=args
 
         self.modifiers=tuple(
