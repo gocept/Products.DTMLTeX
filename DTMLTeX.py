@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.11 2004/11/03 23:31:58 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.12 2004/12/07 11:02:13 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -72,9 +72,6 @@ class DTMLTeX(DTMLMethod, PropertyManager):
                                            'genlatex'),
                       'ext':'ps'}}
 
-    download = False
-    filename = None
-
     default_dm_html = \
 r"""\documentclass{minimal}
 \begin{document}
@@ -116,13 +113,16 @@ r"""\documentclass{minimal}
         kw['__temporary_files__'] = tmp
 
 	if download is None:
-	    download = self.download
+	    if hasattr(self, 'download'):
+		download = self.download
+	    else:
+		download = False
 
 	if filename is None:
-	    filename = self.filename or self.id
-
-	if REQUEST is None and hasattr(self, 'REQUEST'):
-	    REQUEST = self.REQUEST
+	    if hasattr(self, 'filename'):
+		filename = self.filename
+	    else:
+		filename = self.id
 
 	if REQUEST is not None:
 	    if REQUEST.has_key('tex_raw'):
@@ -134,12 +134,15 @@ r"""\documentclass{minimal}
 	    if REQUEST.has_key('filename'):
 		filename = REQUEST['filename']
 
-	# If we shall deliver something, we need a RESPONSE. If
-	# someone creates a constellation where there is no REQUEST of
-	# any kind, but deliver == True, they're on their own.
+	# We can not deliver anything if there is no RESPONSE.
 
-	if deliver:
+	if RESPONSE is None \
+	    and REQUEST is not None \
+	    and hasattr(REQUEST, 'RESPONSE'):
 	    RESPONSE = REQUEST.RESPONSE
+
+	if RESPONSE is None:
+	    deliver = False
         
         # resolve dtml
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
