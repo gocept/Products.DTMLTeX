@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.13 2004/12/07 11:10:02 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.14 2004/12/07 16:05:17 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -112,6 +112,17 @@ r"""\documentclass{minimal}
         kw['document_title'] = self.title
         kw['__temporary_files__'] = tmp
 
+        # resolve dtml
+        tex_code = HTML.__call__(self, client, REQUEST, **kw)
+
+        # Interpreting the DTMLMethod code: "client is None" means
+        # this is a subtemplate so no further processing and no HTTP
+        # headers are needed. On "RESPONSE is None", a DTMLMethod just
+        # returns the code, too.
+        if client is None or RESPONSE is None:
+            return tex_code
+
+        # Handle options
         if download is None:
             if hasattr(self, 'download'):
                 download = self.download
@@ -134,22 +145,12 @@ r"""\documentclass{minimal}
             if REQUEST.has_key('filename'):
                 filename = REQUEST['filename']
 
-        # We can not deliver anything if there is no RESPONSE.
-
-        if RESPONSE is None \
-            and REQUEST is not None \
-            and hasattr(REQUEST, 'RESPONSE'):
-            RESPONSE = REQUEST.RESPONSE
-
-        if RESPONSE is None:
-            deliver = False
+        # That's it for option handling. Now let's go about returning
+        # a result.
         
-        # resolve dtml
-        tex_code = HTML.__call__(self, client, REQUEST, **kw)
-
-        # We were either not called directly, or somebody explicitly
-        # wants to see the tex code, no converted postscript or pdf.
         if tex_raw:
+            # Somebody explicitly wants to see the tex code, not a
+            # typeset postscript or pdf document.
             if deliver:
                 RESPONSE.setHeader(
                     "Content-type",
@@ -163,13 +164,13 @@ r"""\documentclass{minimal}
         # OK, we're still here. This means we have to throw the stuff
         # at the typesetter.
 
-        # Determine which latex filter to use
+        # Determine which typesetting filter chain to use
         used_filter = REQUEST.get('tex_filter', self.defaultfilter)
         if not used_filter in self.filterIds():
             used_filter = self.defaultfilter
         used_filter = self.filters[used_filter]
 
-        #make the distilled output from TeX
+        # Do the typesetting.
         try:
             result = latex(used_filter['path'], used_filter['ext'],
                            tex_code)
