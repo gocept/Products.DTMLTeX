@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.9.2.1 2004/10/27 09:18:03 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.9.2.2 2004/12/07 11:10:14 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -99,13 +99,13 @@ r"""\documentclass{minimal}
         return self.filters.keys()
         
     def __call__(self, client=None,
-		 REQUEST=None, RESPONSE=None, **kw):
+                 REQUEST=None, RESPONSE=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         Response, and key word arguments."""
 
-	#XXX Here we throw away the response passed. Maybe this is
-	#asking for trouble - we'll see.
-	RESPONSE = self.REQUEST.RESPONSE
+        #XXX Here we throw away the response passed. Maybe this is
+        #asking for trouble - we'll see.
+        RESPONSE = self.REQUEST.RESPONSE
 
         #this list takes the temporary-file objects
         tmp = [] 
@@ -318,7 +318,7 @@ def create_temp(self, t=60):
 
     suffix = mimetypes.guess_extension(self.content_type) or ""
     if suffix == '.jpe':
-	suffix = '.jpg'
+        suffix = '.jpg'
 
     base = mktemp()
     os.mkdir(base)
