@@ -17,7 +17,8 @@
 
 \begin{document}
 
-\begin{letter}{<dtml-var realname>\\<dtml-var address>}
+\begin{letter}{<dtml-var realname>\\
+               <dtml-var "string.replace(address, '\n', r'\\')">}
 
   \setkomavar{subject}{Fee notification}
   \opening{Dear <dtml-var salutation>,}
