@@ -1,23 +1,17 @@
-# Copyright (C) gocept gmbh & co. kg, http://www.gocept.com
+# -*- coding: utf-8 -*-
+######################################################################
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
+# DTMLTeX - A Zope Product for PS/PDF generation with TeX
+# Copyright (C) 2002-2004 gocept gmbh & co. kg
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# See also LICENSE.txt
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""
-Serializers for AdaptableStorage
+######################################################################
+"""Serializers for AdaptableStorage.
 
-$Id: AdaptableStorage.py,v 1.2 2003/09/05 16:09:37 ctheune Exp $
-"""
+$Id: AdaptableStorage.py,v 1.3 2004/03/08 16:31:06 thomas Exp $"""
+
+__version__= '0.01'
 
 from apelib.core.interfaces import ISerializer
 from apelib.core.schemas import RowSequenceSchema, FieldSchema
@@ -96,7 +90,6 @@ class AttributeSerializer:
 
 
 class DTMLTeXPropertySerializer(AttributeSerializer):
-
     serializes = DTMLTeX 
     attributes = {
         'temppath': str, 
@@ -106,7 +99,6 @@ class DTMLTeXPropertySerializer(AttributeSerializer):
     }
 
 class DTMLTeXDataSerializer:
-    
     __implements__ = ISerializer
 
     schema = FieldSchema('data', 'string')

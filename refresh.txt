@@ -1,0 +1,2 @@
+Don't delete this file. Its existence signals reloadability of the
+DTMLTeX Product.
