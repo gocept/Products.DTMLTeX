@@ -15,13 +15,12 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1 2002/05/30 13:37:18 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.2 2004/03/02 13:31:54 thomas Exp $
 
 """DTML TeX objects."""
 
 __version__='0.01'
 
-from OFS import PropertyManager
 from Globals import HTML, HTMLFile, MessageDialog
 from OFS.content_types import guess_content_type
 from OFS.DTMLMethod import DTMLMethod, decapitate
@@ -32,18 +31,11 @@ colors = ["#FFFFFF","#FF9944"]
 tempdir='/tmp'
 LATEX='/usr/bin/pdflatex'
 
-class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
+class DTMLTeX(DTMLMethod):
     """DTML TeX objects are DTML-Methods that produce Postscript from TeX"""
     meta_type='DTML TeX'
     
     index_html=None # Prevent accidental acquisition
-
-    manage_options=({'label':'Edit', 'action':'manage_main'},
-                    {'label':'Upload', 'action':'manage_uploadForm'},
-                    {'label':'View', 'action':''},
-                    {'label':'Proxy', 'action':'manage_proxyForm'},
-                    {'label':'Security', 'action':'manage_access'},
-                   ) + PropertyManager.PropertyManager.manage_options;
 
     __ac_permissions__=(
     ('View management screens',
@@ -264,8 +256,11 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
-# Revision 1.1  2002/05/30 13:37:18  ctheune
-# Initial revision
+# Revision 1.2  2004/03/02 13:31:54  thomas
+# * PropertyManager thrown out
+#
+# Revision 1.1.1.1  2002/05/30 13:37:18  ctheune
+# Imported sources
 #
 # Revision 1.4  2002/02/20 10:28:18  zagy
 # changed behaviour if file is include in another dtml
