@@ -12,32 +12,39 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.23 2005/01/10 16:49:49 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.24 2005/01/11 22:08:24 thomas Exp $"""
 
 # Python imports
 import os.path
-import re
 from urllib import quote
+from tempfile import mkdtemp
+from os import chdir, listdir, getcwd, unlink, rmdir, \
+    spawnv, waitpid, P_WAIT
 
 # Zope imports
-from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
-from OFS.content_types import guess_content_type
-from OFS.DTMLMethod import DTMLMethod, decapitate
+from Globals import HTML, HTMLFile, InitializeClass
+from OFS.DTMLMethod import DTMLMethod
 from OFS.PropertyManager import PropertyManager
 from AccessControl import ClassSecurityInfo
-from ZODB.PersistentMapping import PersistentMapping
 from DocumentTemplate.DT_Util import TemplateDict
 from Products.PythonScripts.standard import html_quote
 
 # Sibling imports
 from Products.DTMLTeX import texvar
 
+# Some helper functions
 def join_dicts(a, b):
     a.update(b)
     return a
 
+def TrueOrFalse(x):
+    return x not in (False, 0, 'False', 'false', '0',
+                     'No', 'no', 'Off', 'off')
+
 # Color for the error beautifier
 errorcolor = "#fc6"
+
+base = 'file'
 
 addForm = HTMLFile('dtml/texAdd', globals())
 
@@ -264,49 +271,38 @@ r"""\documentclass{minimal}
 
 InitializeClass(DTMLTeX)
 
-#### This is for running the latex-command
-from os import chdir, spawnv, waitpid, unlink, P_WAIT
-from thread import start_new_thread
-from time import sleep
-from tempfile import mktemp
-from glob import glob
-import tempfile
-
-
-def tmpcmd (path, args):
-    chdir(tempfile.gettempdir())
-    if spawnv(P_WAIT, path, args):
-        raise 'CommandError'
-        pass
-    return
-
+# This is for running the latex-command
 def latex(binary, ext, tex_code):
-    try:
-        base = mktemp()
-        tex = base + ".tex"
-        output = base + ".%s" % ext
-        log = base + ".log" 
+    cwd = getcwd()
+
+    dirpath = mkdtemp()
+    chdir(dirpath)
+
+    texfile = base + ".tex"
+    tex = os.path.join(dirpath, texfile)
+    output = os.path.join(dirpath, base + "." + ext)
+    log = os.path.join(dirpath, base + ".log")
         
-        # create temporary tex file
-        f = open(tex, "w")
-        f.write(tex_code)
-        f.close()
+    # create temporary tex file
+    file(tex, "w").write(tex_code)
 
-        rerun = 1     # flag for running the command again
-        runs = 0      # count of runs already done.
+    rerun = True  # flag for running the command again
+    runs = 0      # count of runs already done.
 
+    try:
         while rerun and runs <= 10:
-            rerun = 0
+            rerun = False
 
             try:
-                tmpcmd(binary,
-                       (binary, '-interaction=batchmode', tex)) 
+                if spawnv(P_WAIT, binary,
+                          (binary, '-interaction=batchmode', texfile)):
+                    raise 'CommandError'
                 runs += 1
             except 'CommandError':
-                logdata = open(log, "r").read().split("\n")
+                logdata = file(log).readlines()
                 raise 'LatexError', logdata
                 
-            logdata = open(log, "r").read().split("\n")
+            logdata = file(log).readlines()
 
             # if the output contains hints about rerunning the
             # generation (content etc) we do so ...
@@ -314,22 +310,23 @@ def latex(binary, ext, tex_code):
             for line in logdata:
                 if line.startswith("LaTeX Warning:") \
                         and line.lower().find("rerun") != -1:
-                    rerun = 1
+                    rerun = True
                 if line == "! Emergency stop." or \
                        line == "No pages of output.":
                     raise 'LatexError', logdata
         
-        f  = open(output, "rb")
-        out = f.read()
-        f.close()
+        out = file(output, "rb").read()
     finally:
-        for i in glob(base + ".*"):
-            unlink(i)
+        chdir(cwd)
+
+        for i in listdir(dirpath):
+            unlink(os.path.join(dirpath, i))
+        rmdir(dirpath)
+
     return out
 
+# The next lines are the Code-o-Beautifier *G
 def compose_errmsg(logdata, tex_code):
-    # The next lines are the Code-o-Beautifier *G
-
     # Pick error lines from latex log, mark up log
     errorlines = []
     contline = 0
@@ -338,9 +335,10 @@ def compose_errmsg(logdata, tex_code):
         line = html_quote(line);
                 
         if contline:
-            errlog += "%s</a>\n</strong>" % re.sub(
-                r"^( *)", r'\1<a href="#line%s">' % errline,
-                line)
+            stripped_line = lstrip(line)
+            whitespace = line[:len(line)-len(stripped_line)]
+            errlog += '%s<a href="#line%s">%s</a>\n</strong>' % \
+                (whitespace, errline, stripped_line)
             contline = 0
             continue
 
@@ -423,40 +421,3 @@ r'''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 ''' % (errorcolor, errlog, texlog)
 
     return errmsg
-
-### Extension to File class follows
-import OFS.Image
-import mimetypes
-
-def delete_tempfile_thread(tmp, t):
-    sleep(t)
-    unlink(tmp)
-    return
-
-def create_temp(self, t=60):
-
-    suffix = mimetypes.guess_extension(self.content_type) or ""
-    if suffix == '.jpe':
-        suffix = '.jpg'
-
-    base = mktemp()
-    os.mkdir(base)
-    tmp = base + "/file" + suffix
-    f = open(tmp, "w")
-    data = self.data
-    if type(data) is not type(''):
-        while data:
-            f.write(data.data)
-            data = data.next
-    else:
-        f.write(data)
-    f.close()
-    # this removes the temporary file in t seconds
-    #    start_new_thread(delete_tempfile_thread, (tmp, t))
-    return tmp
-
-OFS.Image.File.create_temp = create_temp
-
-def TrueOrFalse(x):
-    return x not in (False, 0, 'False', 'false', '0',
-                     'No', 'no', 'Off', 'off')
