@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: tex_quote.py,v 1.1.1.1.8.3 2004/09/20 12:56:54 thomas Exp $
+# $Id: tex_quote.py,v 1.1.1.1.8.4 2004/09/20 13:03:50 thomas Exp $
 
 replacement_table =  \
     [   ("\\", r"\textbackslash{}"),
@@ -30,8 +30,7 @@ replacement_table =  \
         ("^", r"\textasciicircum{}"),
         ("|", r"\textbar{}"),
         ("<", r"\textless{}"),
-        (">", r"\textgreater{}"),
-	("/", r'/""') ]
+        (">", r"\textgreater{}") ]
 
 def tex_quote(data, name='(Unknown name)', md={}):
     """A dtml modifier, that returns quoted text for TeX."""
