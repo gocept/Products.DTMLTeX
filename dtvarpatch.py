@@ -25,13 +25,13 @@ LaTeX=LaTeXClass.LaTeXClass()
 def structured_tex(data, name='(Unknown name)', md={}):
     """convert structured text into latex"""
 
-    LOG("DTMLTex",DEBUG,"structured_tex(%r,%r,%r)" % (data,name,md))
+    LOG("DTMLTex", DEBUG, "structured_tex(%r,%r,%r)" % (data,name,md))
     s = data[:]
 
     return LaTeX(st.Document(st.Basic(s)),header=0)
     
 
-LOG("DTMLTex",0,"Applying structured-tex DTML monkeypatch.")
+LOG("DTMLTex", INFO, "Applying structured-tex DTML monkeypatch.")
 
 from DocumentTemplate import DT_Var
 

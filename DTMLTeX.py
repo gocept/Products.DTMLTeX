@@ -15,14 +15,14 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.10 2003/11/14 22:21:57 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.11 2003/11/17 18:49:28 ctheune Exp $
 
 """DTML TeX objects."""
 
 __version__='0.3'
 
 from OFS import PropertyManager
-from Globals import HTML, HTMLFile, MessageDialog
+from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
 from OFS.DTMLMethod import DTMLMethod, decapitate
 from AccessControl import ClassSecurityInfo
@@ -83,15 +83,11 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
     defaultfilter = "pdf"
 
 
-    __ac_permissions__=(
-    ('View management screens',
-     ('manage_editForm', 'manage', 'manage_main', 'manage_uploadForm',
-      'document_src', 'PrincipiaSearchSource',)),
-    ('Change DTML Methods',     ('manage_edit', 'manage_upload', 'PUT')),
-    ('Change proxy roles', ('manage_proxyForm', 'manage_proxy')),
-    ('View', ('__call__','',)),
-    ('FTP access', ('manage_FTPstat','manage_FTPget','manage_FTPlist')),
-    )
+    security.declareProtected('View management screens', 'manage_editForm', 'manage', 'manage_main', 'manage_uploadForm', 'document_src', 'PrincipiaSearchSource')
+    security.declareProtected('Change DTML Methods', 'manage_edit', 'manage_upload', 'PUT')
+    security.declareProtected('Change proxy roles', 'manage_proxyForm', 'manage_proxy')
+    security.declareProtected('View', '__call__','')
+    security.declareProtected('FTP access', 'manage_FTPstat','manage_FTPget','manage_FTPlist')
 
     def __init__(self, *nv, **kw):
         DTMLTeX.inheritedAttribute('__init__')(self, *nv, **kw)
@@ -209,7 +205,7 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
                                             self.filters.items() ]
         return list
 
-    security.declareProtected('Edit DTMLTeXs')
+    security.declareProtected('Edit DTMLTeXs', 'updateFilters')
     def updateFilters(self, REQUEST):
         """Updates the filter list."""
         for filter in self.filters.keys():
@@ -234,6 +230,8 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
 
         return self.manage_filterForm(self, REQUEST,
                     manage_tabs_message="Filters updated.")
+
+InitializeClass(DTMLTeX)
 
 #### This is for running the latex-command
 from os import chdir, spawnv, waitpid, unlink, P_WAIT
@@ -334,6 +332,10 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.11  2003/11/17 18:49:28  ctheune
+#  - minor cleanups
+#  - fix for bug #1419
+#
 # Revision 1.1.1.1.8.10  2003/11/14 22:21:57  ctheune
 #  - checking spawnv to avoid forking (need windows compatibility)
 #

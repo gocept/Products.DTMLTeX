@@ -15,13 +15,13 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.5 2002/12/29 16:02:51 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.6 2003/11/17 18:49:28 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
 import DTMLTeX
 from tex_quote import tex_quote, __init__25, __init__24
-from zLOG import LOG,BLATHER
+from zLOG import *
 
 def initialize(context):
     context.registerClass(
@@ -50,16 +50,18 @@ if hasattr(version_txt, "getZopeVersion"):
 else:
     version = [2,4]
 
+print version
+
 if version[0] != 2:
-    LOG("DTMLTeX", 500, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
+    LOG("DTMLTeX", PANIC, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
     raise "CompatibilityError"
 elif version[1] <= 4:
-    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( <= 2.4 ). Trying to apply patch for Zope 2.4 maybe this works. (IF this is a 2.4, this will work, but i can't determine earlier versions.)")
+    LOG("DTMLTeX", WARNING, "Unsupported Zope Version. ( <= 2.4 ). Trying to apply patch for Zope 2.4 maybe this works. (IF this is a 2.4, this will work, but i can't determine earlier versions.)")
     new = __init__24
-elif version[1] == 5:
+elif version[1] in [5,6,7]:
     new = __init__25
-elif version[1] > 5:
-    LOG("DTMLTeX", 100, "Unsupported Zope Version. ( > 2.5 ). Trying to apply patch for Zope 2.5 maybe this works.")
+elif version[1] > 7:
+    LOG("DTMLTeX", WARNING, "Unsupported Zope Version. ( > 2.5 ). Trying to apply patch for Zope 2.5 maybe this works.\nReported version is: %s" % version)
     new = __init__25
     
 from DocumentTemplate import DT_Var
@@ -73,10 +75,10 @@ try:
     try:
         import stxdocpatch
     except ImportError:
-        LOG('DTMLTeX',BLATHER,"ImportError when applying LaTeX/PDF patch.")
+        LOG('DTMLTeX', WARNING, "ImportError when applying STX patch.")
         import traceback
         traceback.print_exc()
 except ImportError:
-    LOG('DTMLTeX',BLATHER,"Product Structured Document not found. Not applying LaTeX/PDF patch.")
+    LOG('DTMLTeX', WARNING, "Product `Structured Document` not found. Not applying STX patch.")
     
 import dtvarpatch

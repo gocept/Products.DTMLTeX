@@ -15,7 +15,7 @@
 
 from zLOG import *
 
-LOG("DTMLTeX",0,"applying Structured Document LaTeX/PDF patch.")
+LOG("DTMLTeX", INFO, "Applying STX patch.")
 
 import Products.StructuredDocument.StructuredDocument as std
 from OFS.DTMLMethod import decapitate
