@@ -1,7 +1,9 @@
 
  Version 0.3
 
-    - Added Windows compatibility by using spawnv instead of fork.
+    - Added Windows compatibility by using spawnv instead of fork, using
+      tempfile in a more generic fashion and using explicit binary mode for
+      reading a file.
 
     - Some security enhancements (no paths TTW anymore, clean 2.4 security
       machinery upgrade)
