@@ -4,8 +4,25 @@ This is DTMLTeX, a Zope Product similar to the DTML Method, but which
 gets sent through pdflatex (you may replace this with the default
 latex/dvips procedure) and sends you a pdf file as view.
 
-This release is based on the Zope Product found on zope.org, created
-originally by Marian Kelc.
+This release is based on the Zope Product found on zope.org by
+Christian Theune <ct@gocept.com>.
+
+Andreas Kostyrka <andreas@kostyrka.priv.at> added the following
+features:
+
+- Conversion of Structured Text to LaTeX.
+  + <dtml-var stxtxt fmt=structured-tex>
+    This adds the formatted LaTeX code for stxtxt.
+- StructuredDocument support.
+  If the StructuredDocument product by maik.jablonski@uni-bielefeld.de
+  is found, it is patched to support a /pdf method that creates a PDF
+  version of the document.
+  standard_latex_header and standard_latex_footer are stuck onto the
+  LaTeX generated from the Document.
+
+  For an example in production use see http://www.detox.at/ and
+  http://www.detox.at/index_html/pdf
+
 
 PREREQUISITES
 
@@ -53,4 +70,3 @@ This Product was first developed by Marian Kelc in 1999. Due to
 changes in Zope and lack of time from Marian, Christian Theune
 <ct@gocept.com> took over. The current maintainer is Thomas Lotze
 <tl@gocept.com>, starting March 2004.
-
