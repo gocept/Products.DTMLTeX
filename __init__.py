@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.3 2002/07/24 22:49:11 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.4 2002/07/24 22:50:13 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
@@ -55,6 +55,7 @@ if version[0] != 2:
     raise "CompatibilityError"
 elif version[1] <= 4:
     LOG("DTMLTeX", 100, "Unsupported Zope Version. ( <= 2.4 ). Trying to apply patch for Zope 2.4 maybe this works. (IF this is a 2.4, this will work, but i can't determine earlier versions.)")
+    new = __init__24
 elif version[1] == 5:
     new = __init__25
 elif version[1] > 5:
