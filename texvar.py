@@ -10,11 +10,11 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.6 2005/01/10 16:55:44 thomas Exp $"""
+$Id: texvar.py,v 1.7 2005/01/11 20:24:51 thomas Exp $"""
+
+# Zope imports
 
 from ZPublisher.TaintedString import TaintedString
-
-from DocumentTemplate.DT_Var import Var
 from DocumentTemplate.DT_Util import parse_params, name_param, ustr
 
 def replace_map(value, map):
