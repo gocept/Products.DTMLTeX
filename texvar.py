@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.4 2005/01/05 09:47:30 mac Exp $"""
+$Id: texvar.py,v 1.5 2005/01/05 10:09:15 mac Exp $"""
 
 from ZPublisher.TaintedString import TaintedString
 
@@ -73,6 +73,7 @@ class TEXVar:
 
 maps = {
     'nl_to_dbs': [('\n', r'\\')],
+    'nl_to_newline': [('\n', r'\newline ')],
     'tab_to_amp': [('\t', '&')],
     'tex_quote': [
         ("\\", r"\textbackslash{}"),
