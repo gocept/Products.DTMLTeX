@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.10 2005/01/19 10:12:28 thomas Exp $"""
+$Id: texvar.py,v 1.11 2005/03/15 21:59:25 thomas Exp $"""
 
 # Zope imports
 
@@ -24,6 +24,50 @@ def replace_map(value, map):
     for old, new in map:
         value = value.replace(old, new)
     return value
+
+def transform_content(val, args):
+    # Sanitize input, allowing for simpler format_maps which
+    # can take some things for granted:
+
+    # Retain a newline at the end.
+    newline_at_end = val.endswith('\n') or \
+        val.endswith('\r')
+
+    # Make line endings Unix-like, while trimming whitespace
+    # on the right (so empty lines are really empty).
+    lines = []
+    for line in val.splitlines():
+        lines.append(line.rstrip())
+    val = '\n'.join(lines)
+
+    if newline_at_end:
+        val += '\n'
+
+    # Now we can work with somewhat saner input.
+
+    if args.has_key('tex_quote'):
+        val = replace_map(val, maps['tex_quote'])
+
+        # For replacing characters beyond ASCII (which
+        # math_chars are) we switch to unicode. val will be
+        # decoded under the assumption that it's in system
+        # encoding. If the system encoding is ASCII and val
+        # contains characters beyond that (i.e., in the case
+        # math quoting makes sense in the first place), this
+        # will break, raising an encoding error.
+        # Make sure strings subject to tex_quote are always
+        # unicode.
+        val = unicode(val)
+
+        for c in math_chars:
+            val = val.replace(c, '\\ensuremath{%s}' % c)
+
+    if args.has_key('format_maps'):
+        selected_maps = args['format_maps'].replace(' ', '').split(',')
+        for map in selected_maps:
+            val = replace_map(val, maps[map])
+
+    return val
 
 class TEXVar:
     name = "texvar"
@@ -59,48 +103,7 @@ class TEXVar:
             if not isinstance(val, TaintedString):
                 val = ustr(val)
 
-            # Sanitize input, allowing for simpler format_maps which
-            # can take some things for granted:
-
-            # Retain a newline at the end.
-            newline_at_end = val.endswith('\n') or \
-                val.endswith('\r')
-
-            # Make line endings Unix-like, while trimming whitespace
-            # on the right (so empty lines are really empty).
-            lines = []
-            for line in val.splitlines():
-                lines.append(line.rstrip())
-            val = '\n'.join(lines)
-
-            if newline_at_end:
-                val += '\n'
-
-            # Now we can work with somewhat saner input.
-
-            if args.has_key('tex_quote'):
-                val = replace_map(val, maps['tex_quote'])
-
-                # For replacing characters beyond ASCII (which
-                # math_chars are) we switch to unicode. val will be
-                # decoded under the assumption that it's in system
-                # encoding. If the system encoding is ASCII and val
-                # contains characters beyond that (i.e., in the case
-                # math quoting makes sense in the first place), this
-                # will break, raising an encoding error.
-                # Make sure strings subject to tex_quote are always
-                # unicode.
-                val = unicode(val)
-
-                for c in math_chars:
-                    val = val.replace(c, '\\ensuremath{%s}' % c)
-
-            if args.has_key('format_maps'):
-                selected_maps = args['format_maps'].replace(' ', '').split(',')
-                for map in selected_maps:
-                    val = replace_map(val, maps[map])
-
-        return val
+        return transform_content(val, args)
 
     __call__ = render
 
