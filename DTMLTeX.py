@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.10 2004/10/27 09:17:53 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.11 2004/11/03 23:31:58 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -65,11 +65,15 @@ class DTMLTeX(DTMLMethod, PropertyManager):
     defaultfilter = "pdf"
 
     filters = {'pdf': {'ct':'application/pdf',
-                       'path':'/usr/bin/pdflatex', 'ext':'pdf'},
+                       'path':'/usr/bin/pdflatex',
+		       'ext':'pdf'},
                'ps': {'ct':'application/ps',
                       'path': os.path.join(os.path.split(__file__)[0],
                                            'genlatex'),
                       'ext':'ps'}}
+
+    download = False
+    filename = None
 
     default_dm_html = \
 r"""\documentclass{minimal}
@@ -97,15 +101,12 @@ r"""\documentclass{minimal}
     def filterIds(self):
         """Lists the Ids of all available filters."""
         return self.filters.keys()
-        
-    def __call__(self, client=None,
-		 REQUEST=None, RESPONSE=None, **kw):
-        """Render the document given a client object, REQUEST mapping,
-        Response, and key word arguments."""
 
-	#XXX Here we throw away the response passed. Maybe this is
-	#asking for trouble - we'll see.
-	RESPONSE = self.REQUEST.RESPONSE
+    def __call__(self, client=None, REQUEST=None, RESPONSE=None,
+		 tex_raw=False, deliver=True,
+		 download=None, filename=None, **kw):
+        """Render the document given a client object, REQUEST mapping,
+        and key word arguments."""
 
         #this list takes the temporary-file objects
         tmp = [] 
@@ -114,29 +115,61 @@ r"""\documentclass{minimal}
         kw['document_title'] = self.title
         kw['__temporary_files__'] = tmp
 
+	if download is None:
+	    download = self.download
+
+	if filename is None:
+	    filename = self.filename or self.id
+
+	if REQUEST is None and hasattr(self, 'REQUEST'):
+	    REQUEST = self.REQUEST
+
+	if REQUEST is not None:
+	    if REQUEST.has_key('tex_raw'):
+		tex_raw = TrueOrFalse(REQUEST['tex_raw'])
+	    if REQUEST.has_key('deliver'):
+		deliver = TrueOrFalse(REQUEST['deliver'])
+	    if REQUEST.has_key('download'):
+		download = TrueOrFalse(REQUEST['download'])
+	    if REQUEST.has_key('filename'):
+		filename = REQUEST['filename']
+
+	# If we shall deliver something, we need a RESPONSE. If
+	# someone creates a constellation where there is no REQUEST of
+	# any kind, but deliver == True, they're on their own.
+
+	if deliver:
+	    RESPONSE = REQUEST.RESPONSE
+        
         # resolve dtml
-        result = HTML.__call__(self, client, REQUEST, **kw)
+        tex_code = HTML.__call__(self, client, REQUEST, **kw)
+
+	# We were either not called directly, or somebody explicitly
+	# wants to see the tex code, no converted postscript or pdf.
+        if tex_raw:
+	    if deliver:
+		RESPONSE.setHeader(
+		    "Content-type",
+		    "application/x-tex; name=%s.tex" % filename)
+		if download:
+		    RESPONSE.setHeader(
+			"Content-Disposition",
+			"attachment; filename=%s.tex" % filename)
+            return tex_code
         
-        if client is None or REQUEST.has_key("tex_raw"):
-            # We were either not called directly, or somebody
-            # explicitly wants to see the tex code, no converted
-            # postscript or pdf.
-            RESPONSE.setHeader("Content-type", "application/x-tex")
-            return result
-        
+	# OK, we're still here. This means we have to throw the stuff
+	# at the typesetter.
+
         # Determine which latex filter to use
         used_filter = REQUEST.get('tex_filter', self.defaultfilter)
         if not used_filter in self.filterIds():
             used_filter = self.defaultfilter
         used_filter = self.filters[used_filter]
 
-        # construct the content-type
-        RESPONSE.setHeader("Content-type", used_filter['ct'])
-        
         #make the distilled output from TeX
         try:
-            return latex(used_filter['path'], used_filter['ext'],
-                         result)
+            result = latex(used_filter['path'], used_filter['ext'],
+			   tex_code)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
 
@@ -229,8 +262,25 @@ r"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 </html>
 """ % (errorcolor, errlog, texlog)
 
-            RESPONSE.setHeader('Content-Type', 'text/html')
             return errmsg
+
+	# Still here? Fine. Now we have a typeset document to return,
+	# maybe deliver.
+
+        # construct the content-type
+	if deliver:
+	    RESPONSE.setHeader(
+		"Content-type",
+		"%s; name=%s.%s" % (used_filter['ct'],
+				    filename,
+				    used_filter['ext']))
+
+	    if download:
+		RESPONSE.setHeader(
+		    "Content-Disposition",
+		    "attachment; filename=%s.%s" % (
+			filename, used_filter['ext']))
+	return result
 
     security.declareProtected('View management screens', 'getFilters')
 
@@ -337,3 +387,7 @@ def create_temp(self, t=60):
     return tmp
 
 OFS.Image.File.create_temp = create_temp
+
+def TrueOrFalse(x):
+    return x not in (False, 0, 'False', 'false', '0',
+		     'No', 'no', 'Off', 'off')
