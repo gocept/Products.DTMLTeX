@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.21 2005/01/10 13:32:06 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.22 2005/01/10 13:39:01 thomas Exp $"""
 
 # Python imports
 import os.path
@@ -119,12 +119,6 @@ r"""\documentclass{minimal}
 
     def __init__(self, *nv, **kw):
         DTMLMethod.__init__(self, *nv, **kw)
-
-    security.declareProtected('View management screens', 'filterIds')
-
-    def filterIds(self):
-        """Lists the Ids of all available filters."""
-        return self.filters.keys()
 
     def __call__(self, client=None, REQUEST=None, RESPONSE=None,
                  **kw):
@@ -256,8 +250,12 @@ r"""\documentclass{minimal}
                         filename, tex_filter['ext']))
         return result
 
-    security.declareProtected('View management screens', 'getFilters')
+    security.declareProtected('View management screens', 'filterIds')
+    def filterIds(self):
+        """Lists the Ids of all available filters."""
+        return self.filters.keys()
 
+    security.declareProtected('View management screens', 'getFilters')
     def getFilters(self, REQUEST=None):
         """Returns a list of all filters."""
         list = [join_dicts(value, {'mapid':id})
@@ -282,7 +280,7 @@ def tmpcmd (path, args):
         pass
     return
 
-def latex(binary, ext, data):
+def latex(binary, ext, tex_code):
     try:
         base = mktemp()
         tex = base + ".tex"
@@ -291,10 +289,9 @@ def latex(binary, ext, data):
         
         # create temporary tex file
         f = open(tex, "w")
-        f.write(data)
+        f.write(tex_code)
         f.close()
 
-        stdout = []   # list of output lines of the command
         rerun = 1     # flag for running the command again
         runs = 0      # count of runs already done.
 
@@ -306,21 +303,21 @@ def latex(binary, ext, data):
                        (binary, '-interaction=batchmode', tex)) 
                 runs += 1
             except 'CommandError':
-                stdout = open(log, "r").read().split("\n")
-                raise 'LatexError', stdout
+                logdata = open(log, "r").read().split("\n")
+                raise 'LatexError', logdata
                 
-            stdout = open(log, "r").read().split("\n")
+            logdata = open(log, "r").read().split("\n")
 
             # if the output contains hints about rerunning the
             # generation (content etc) we do so ...
             # but at maximum 10 times ...
-            for line in stdout:
+            for line in logdata:
                 if line.startswith("LaTeX Warning:") \
                         and line.lower().find("rerun") != -1:
                     rerun = 1
                 if line == "! Emergency stop." or \
                        line == "No pages of output.":
-                    raise 'LatexError', stdout
+                    raise 'LatexError', logdata
         
         f  = open(output, "rb")
         out = f.read()

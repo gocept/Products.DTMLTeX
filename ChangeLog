@@ -3,6 +3,8 @@ Version 0.7pre3
     - Set content type for LaTeX error pages to text/html to override the
       default of text/xml.
 
+    - Some code clean-up.
+
 Version 0.7pre2
 
     - Removed DTML-Var monkeypatch
