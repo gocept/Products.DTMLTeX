@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.12 2003/11/17 19:10:32 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.13 2003/11/17 21:32:05 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -61,27 +61,24 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
     
     meta_type='DTML TeX'
 
-    __version__ = "0.3"
-    
     security = ClassSecurityInfo()
     
     index_html=None # Prevent accidental acquisition
-    manage_filterForm = HTMLFile('dtml/texFilters', globals())
 
     manage_options=({'label':'Edit', 'action':'manage_main'},
                     {'label':'View', 'action':''} ) + \
                     PropertyManager.PropertyManager.manage_options + \
-                   ( {'label':'Filters', 'action':'manage_filterForm'},
-                     {'label':'Proxy', 'action':'manage_proxyForm'},
+                   ( {'label':'Proxy', 'action':'manage_proxyForm'},
                      {'label':'Security', 'action':'manage_access'} )
 
     _properties = ( { 'id':'defaultfilter', 'type':'selection', 'select_variable': 'filterIds', 
-                      'mode':'w'},
-                    { 'id':'temppath', 'type':'string', 'mode':'w'} )
+                      'mode':'w'}, )
 
-    temppath = "/tmp"
+    _temppath = "/tmp"
     defaultfilter = "pdf"
 
+    filters = { 'pdf' : { 'ct':'application/pdf', 'path':'/usr/bin/pdflatex', 'ext':'pdf'},
+                'ps' : {'ct':'application/ps', 'path': os.path.join(os.path.split(__file__)[0],'genlatex'), 'ext':'ps'}}
 
     security.declareProtected('View management screens', 'manage_editForm', 'manage', 'manage_main', 'manage_uploadForm', 'document_src', 'PrincipiaSearchSource')
     security.declareProtected('Change DTML Methods', 'manage_edit', 'manage_upload', 'PUT')
@@ -91,24 +88,7 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
 
     def __init__(self, *nv, **kw):
         DTMLTeX.inheritedAttribute('__init__')(self, *nv, **kw)
-        self.filters = PersistentMapping( { 'pdf' : PersistentMapping({ 'ct':'application/pdf', 'path':'/usr/bin/pdflatex', 'ext':'pdf'}),
-                                            'ps' : PersistentMapping({'ct':'application/ps', 'path': os.path.join(os.path.split(__file__)[0],'genlatex'), 'ext':'ps'}) } )
-
-    def __setstate__(self, state):
-        # added upgrade feature
-        DTMLTeX.inheritedAttribute('__setstate__')(self, state)
-
-
-        if not hasattr(self, "__version__"):
-                self.__version__ = "0.2"
-
-        if self.__version__ == "0.2":
-            self.__version__ = "0.3"
-            self.filters = PersistentMapping( { 'pdf' : PersistentMapping( 
-                 { 'ct':'application/pdf', 'path':'/usr/bin/pdflatex', 'ext':'pdf'}),
-                   'ps' : PersistentMapping({'ct':'application/ps', 
-                   'path': os.path.join(os.path.split(__file__)[0],'genlatex'), 'ext':'ps'})})
-            self.defaultfilter = 'pdf'
+        self.__version__ = "0.3"
 
     security.declareProtected('View management screens', 'filterIds')
     def filterIds(self):
@@ -145,11 +125,11 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
         used_filter = self.filters[used_filter]
 
         # construct the content-type
-        REQUEST.RESPONSE.setHeader("content-type", used_filter['ct'])
+        REQUEST.RESPONSE.setHeader("Content-type", used_filter['ct'])
         
         #make the distilled output from TeX
         try:
-            return latex(used_filter['path'], used_filter['ext'], self.temppath, result)
+            return latex(used_filter['path'], used_filter['ext'], self._temppath, result)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
             tf = texfile.split("\n")
@@ -205,32 +185,6 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
         list = [ join_dicts(value, { 'mapid':id }) for (id, value) in 
                                             self.filters.items() ]
         return list
-
-    security.declareProtected('Edit DTMLTeXs', 'updateFilters')
-    def updateFilters(self, REQUEST):
-        """Updates the filter list."""
-        for filter in self.filters.keys():
-            if not REQUEST.has_key(filter):
-                continue
-                
-            filter_data = REQUEST.get(filter)
-            if filter_data.mapid  == "":
-                del(self.filters[filter])
-            else:
-                self.filters[filter] = PersistentMapping({ 'ct': filter_data.ct, 'path': 
-                            filter_data.path, 'ext':filter_data.ext })
-                self._p_changed = 1
-
-        new = REQUEST.get('new', None)
-        if new:
-            if strip(new.mapid) != "" and strip(new.ct) != "" and \
-                strip(new.path) != "":
-                self.filters[new.mapid] = PersistentMapping({'ct':new.ct, 'path':new.path, 
-                                            'ext':new.ext })
-                self._p_changed = 1
-
-        return self.manage_filterForm(self, REQUEST,
-                    manage_tabs_message="Filters updated.")
 
 InitializeClass(DTMLTeX)
 
@@ -333,6 +287,11 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.13  2003/11/17 21:32:05  ctheune
+#  - Security updates
+#  - Fix for Bug 1455
+#  - Supporting new apeconf
+#
 # Revision 1.1.1.1.8.12  2003/11/17 19:10:32  ctheune
 #  - Fix for Bug 1419
 #
