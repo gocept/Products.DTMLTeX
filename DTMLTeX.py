@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.12 2004/12/07 11:02:13 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.13 2004/12/07 11:10:02 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -66,7 +66,7 @@ class DTMLTeX(DTMLMethod, PropertyManager):
 
     filters = {'pdf': {'ct':'application/pdf',
                        'path':'/usr/bin/pdflatex',
-		       'ext':'pdf'},
+                       'ext':'pdf'},
                'ps': {'ct':'application/ps',
                       'path': os.path.join(os.path.split(__file__)[0],
                                            'genlatex'),
@@ -100,8 +100,8 @@ r"""\documentclass{minimal}
         return self.filters.keys()
 
     def __call__(self, client=None, REQUEST=None, RESPONSE=None,
-		 tex_raw=False, deliver=True,
-		 download=None, filename=None, **kw):
+                 tex_raw=False, deliver=True,
+                 download=None, filename=None, **kw):
         """Render the document given a client object, REQUEST mapping,
         and key word arguments."""
 
@@ -112,56 +112,56 @@ r"""\documentclass{minimal}
         kw['document_title'] = self.title
         kw['__temporary_files__'] = tmp
 
-	if download is None:
-	    if hasattr(self, 'download'):
-		download = self.download
-	    else:
-		download = False
+        if download is None:
+            if hasattr(self, 'download'):
+                download = self.download
+            else:
+                download = False
 
-	if filename is None:
-	    if hasattr(self, 'filename'):
-		filename = self.filename
-	    else:
-		filename = self.id
+        if filename is None:
+            if hasattr(self, 'filename'):
+                filename = self.filename
+            else:
+                filename = self.id
 
-	if REQUEST is not None:
-	    if REQUEST.has_key('tex_raw'):
-		tex_raw = TrueOrFalse(REQUEST['tex_raw'])
-	    if REQUEST.has_key('deliver'):
-		deliver = TrueOrFalse(REQUEST['deliver'])
-	    if REQUEST.has_key('download'):
-		download = TrueOrFalse(REQUEST['download'])
-	    if REQUEST.has_key('filename'):
-		filename = REQUEST['filename']
+        if REQUEST is not None:
+            if REQUEST.has_key('tex_raw'):
+                tex_raw = TrueOrFalse(REQUEST['tex_raw'])
+            if REQUEST.has_key('deliver'):
+                deliver = TrueOrFalse(REQUEST['deliver'])
+            if REQUEST.has_key('download'):
+                download = TrueOrFalse(REQUEST['download'])
+            if REQUEST.has_key('filename'):
+                filename = REQUEST['filename']
 
-	# We can not deliver anything if there is no RESPONSE.
+        # We can not deliver anything if there is no RESPONSE.
 
-	if RESPONSE is None \
-	    and REQUEST is not None \
-	    and hasattr(REQUEST, 'RESPONSE'):
-	    RESPONSE = REQUEST.RESPONSE
+        if RESPONSE is None \
+            and REQUEST is not None \
+            and hasattr(REQUEST, 'RESPONSE'):
+            RESPONSE = REQUEST.RESPONSE
 
-	if RESPONSE is None:
-	    deliver = False
+        if RESPONSE is None:
+            deliver = False
         
         # resolve dtml
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
 
-	# We were either not called directly, or somebody explicitly
-	# wants to see the tex code, no converted postscript or pdf.
+        # We were either not called directly, or somebody explicitly
+        # wants to see the tex code, no converted postscript or pdf.
         if tex_raw:
-	    if deliver:
-		RESPONSE.setHeader(
-		    "Content-type",
-		    "application/x-tex; name=%s.tex" % filename)
-		if download:
-		    RESPONSE.setHeader(
-			"Content-Disposition",
-			"attachment; filename=%s.tex" % filename)
+            if deliver:
+                RESPONSE.setHeader(
+                    "Content-type",
+                    "application/x-tex; name=%s.tex" % filename)
+                if download:
+                    RESPONSE.setHeader(
+                        "Content-Disposition",
+                        "attachment; filename=%s.tex" % filename)
             return tex_code
         
-	# OK, we're still here. This means we have to throw the stuff
-	# at the typesetter.
+        # OK, we're still here. This means we have to throw the stuff
+        # at the typesetter.
 
         # Determine which latex filter to use
         used_filter = REQUEST.get('tex_filter', self.defaultfilter)
@@ -172,7 +172,7 @@ r"""\documentclass{minimal}
         #make the distilled output from TeX
         try:
             result = latex(used_filter['path'], used_filter['ext'],
-			   tex_code)
+                           tex_code)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
 
@@ -267,23 +267,23 @@ r"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 
             return errmsg
 
-	# Still here? Fine. Now we have a typeset document to return,
-	# maybe deliver.
+        # Still here? Fine. Now we have a typeset document to return,
+        # maybe deliver.
 
         # construct the content-type
-	if deliver:
-	    RESPONSE.setHeader(
-		"Content-type",
-		"%s; name=%s.%s" % (used_filter['ct'],
-				    filename,
-				    used_filter['ext']))
+        if deliver:
+            RESPONSE.setHeader(
+                "Content-type",
+                "%s; name=%s.%s" % (used_filter['ct'],
+                                    filename,
+                                    used_filter['ext']))
 
-	    if download:
-		RESPONSE.setHeader(
-		    "Content-Disposition",
-		    "attachment; filename=%s.%s" % (
-			filename, used_filter['ext']))
-	return result
+            if download:
+                RESPONSE.setHeader(
+                    "Content-Disposition",
+                    "attachment; filename=%s.%s" % (
+                        filename, used_filter['ext']))
+        return result
 
     security.declareProtected('View management screens', 'getFilters')
 
@@ -371,7 +371,7 @@ def create_temp(self, t=60):
 
     suffix = mimetypes.guess_extension(self.content_type) or ""
     if suffix == '.jpe':
-	suffix = '.jpg'
+        suffix = '.jpg'
 
     base = mktemp()
     os.mkdir(base)
@@ -393,4 +393,4 @@ OFS.Image.File.create_temp = create_temp
 
 def TrueOrFalse(x):
     return x not in (False, 0, 'False', 'false', '0',
-		     'No', 'no', 'Off', 'off')
+                     'No', 'no', 'Off', 'off')
