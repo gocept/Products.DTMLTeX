@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.1 2005/01/04 15:33:41 ctheune Exp $"""
+$Id: texvar.py,v 1.2 2005/01/04 18:49:53 thomas Exp $"""
 
 from ZPublisher.TaintedString import TaintedString
 
@@ -21,7 +21,7 @@ def replace_map(value, map):
     """Helper method to make multiple replacements that are
        described in a dictionary
     """
-    for old, new in map.items():
+    for old, new in map:
         value = value.replace(old, new)
     return value
 
@@ -29,8 +29,8 @@ class TEXVar:
     name = "texvar"
 
     def __init__(self, args):
-        args = parse_params(args, name='', expr='', tex_quote=1, 
-                format_maps="")
+        args = parse_params(args, name='', expr='', null='',
+                            tex_quote=1, format_maps='')
 
         name, expr = name_param(args, 'texvar', 1)
         if expr is None:
@@ -52,11 +52,15 @@ class TEXVar:
         else:
             val = expr(md)
 
+        if not val and val != 0 and args.has_key('null'):
+            # check for null (false but not zero, including None, [], '')
+            val = args['null']
+
         if not isinstance(val, TaintedString):
             val = ustr(val)
             
         if self.args.has_key('tex_quote'):
-            val = replace_map(val, maps['quote'])
+            val = replace_map(val, maps['tex_quote'])
 
         if self.args.has_key('format_maps'):
             selected_maps = self.args['format_maps'].split(',')
@@ -68,20 +72,21 @@ class TEXVar:
     __call__ = render
 
 maps = {
-    'nl_to_dbs': {'\n' : r'\\'},
-    'quote' : { 
-        '\\' : r"\textbackslash{}",
-        "$": r"\$",
-        "&": r"\&",
-        "%": r"\%",
-        "#": r"\#",
-        "_": r"\_",
-        "{": r"\{",
-        "}": r"\}",
-        "~": r"\textasciitilde{}",
-        "^": r"\textasciicircum{}",
-        "|": r"\textbar{}",
-        "<": r"\textless{}",
-        ">": r"\textgreater{}"
-    }
+    'nl_to_dbs': [('\n', r'\\')],
+    'tab_to_amp': [('\t', '&')],
+    'tex_quote': [
+        ("\\", r"\textbackslash{}"),
+        ("$", r"\$"),
+        ("&", r"\&"),
+        ("%", r"\%"),
+        ("#", r"\#"),
+        ("_", r"\_"),
+        ("{", r"\{"),
+        ("}", r"\}"),
+        ("~", r"\textasciitilde{}"),
+        ("^", r"\textasciicircum{}"),
+        ("|", r"\textbar{}"),
+        ("<", r"\textless{}"),
+        (">", r"\textgreater{}")
+    ]
 }
