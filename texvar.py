@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.3 2005/01/05 00:33:56 thomas Exp $"""
+$Id: texvar.py,v 1.4 2005/01/05 09:47:30 mac Exp $"""
 
 from ZPublisher.TaintedString import TaintedString
 
@@ -63,7 +63,7 @@ class TEXVar:
                 val = replace_map(val, maps['tex_quote'])
 
             if args.has_key('format_maps'):
-                selected_maps = args['format_maps'].split(',')
+                selected_maps = args['format_maps'].replace(' ', '').split(',')
                 for map in selected_maps:
                     val = replace_map(val, maps[map])
 
