@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.17 2004/12/22 12:27:41 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.18 2004/12/22 13:48:40 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -133,7 +133,7 @@ r"""\documentclass{minimal}
         # Resolve DTML.
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
 
-        # If, for some reason, nothing came back, we're done
+        # If, for some reason, nothing came back, we're done.
         if tex_code == '':
             return ''
 
@@ -387,7 +387,8 @@ def latex(binary, ext, data):
             # generation (content etc) we do so ...
             # but at maximum 10 times ...
             for line in stdout:
-                if line.lower().find("no file") != -1:
+                if line.startswith("LaTeX Warning:") \
+                        and line.lower().find("rerun") != -1:
                     rerun = 1
                 if line == "! Emergency stop." or \
                        line == "No pages of output.":
