@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.1 2002/07/24 22:19:43 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.2 2002/07/24 23:21:30 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -111,7 +111,6 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
         try:
             return latex(result)
         except 'LatexError', (logdata, texfile):
-
             # The next lines are the Code-o-Beautifier *G
             tf = texfile.split("\n")
 
@@ -206,18 +205,21 @@ def latex(binary, temp, data):
             except 'CommandError':
                 stdout = open(log,"r").read().split("\n")
                 raise 'LatexError', (stdout, data)
+                
             stdout = open(log,"r").read().split("\n")
+            
 
             # if the output contains hints about rerunning the generation (content etc) we do so ...
             # but at maximum 10 times ...
             for line in stdout:
                 if line.lower().find("no file") != -1:
                     rerun = 1
+                if line[0] == "!":
+                    raise 'LatexError', (stdout, data)
         
         f  = open( pdf, "r" )
         out= f.read()
         f.close()
-        
     finally:
         for i in glob(base+".*"):
             unlink( i )
@@ -258,6 +260,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.2  2002/07/24 23:21:30  ctheune
+# wrong call to latex()
+#
 # Revision 1.1.1.1.8.1  2002/07/24 22:19:43  ctheune
 # provided the first 0.3 changes:
 #
