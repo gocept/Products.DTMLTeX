@@ -23,10 +23,7 @@
   \setkomavar{subject}{Fee notification}
   \opening{Dear <dtml-var salutation tex_quote>,}
 
-  please note that you have the honour of receiving this example
-  letter. It would be appropriate for you to express your gratitude by
-  transferring a daily fee of \$<dtml-var amount fmt="%2.2f"> to my
-  bank account during the next <dtml-var duration fmt="%i">~years.
+<dtml-var example_content>
 
   \closing{Yours,}
 
