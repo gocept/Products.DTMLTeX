@@ -1,3 +1,14 @@
+Version 0.6pre2
+
+    - Fixed nesting yet again.
+
+    - Character encoding awareness introduced. Currently, encodings other
+      than ASCII must be requested through the encoding parameter.
+
+    - Reworked option handling. There are now defaults defined by the
+      class, overridden by REQUEST parameters, overridden by call
+      parameters. Configurability through the ZMI is planned.
+
 Version 0.6pre1
 
     - New calling parameters for controlling delivery behaviour:
