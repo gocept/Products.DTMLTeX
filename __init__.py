@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.7 2003/12/01 13:32:12 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.8 2003/12/01 13:32:34 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
@@ -49,8 +49,6 @@ if hasattr(version_txt, "getZopeVersion"):
     _version = str(version[0]) + "." + str(version[1])
 else:
     version = [2,4]
-
-print version
 
 if version[0] != 2:
     LOG("DTMLTeX", PANIC, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
