@@ -9,7 +9,7 @@
 ######################################################################
 """DTMLTeX initialization.
 
-$Id: __init__.py,v 1.6 2005/01/04 15:33:41 ctheune Exp $"""
+$Id: __init__.py,v 1.7 2005/01/11 22:04:08 thomas Exp $"""
 
 import DTMLTeX
 from zLOG import *
@@ -39,3 +39,4 @@ except ImportError:
         "Not applying STX patch.")
     
 import dtvarpatch
+import filepatch
