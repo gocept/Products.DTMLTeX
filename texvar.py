@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.9 2005/01/18 21:58:45 thomas Exp $"""
+$Id: texvar.py,v 1.10 2005/01/19 10:12:28 thomas Exp $"""
 
 # Zope imports
 
@@ -123,7 +123,8 @@ maps = { # Maps need to be lists of pairs as order of application may
         ("^", r"\textasciicircum{}"),
         ("|", r"\textbar{}"),
         ("<", r"\textless{}"),
-        (">", r"\textgreater{}")
+        (">", r"\textgreater{}"),
+        ('"', r"\textquotedbl{}")
         ]
 }
 
