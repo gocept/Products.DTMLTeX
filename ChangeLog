@@ -1,7 +1,10 @@
-Version 0.7
+Version 0.7pre2
 
-	-	Removed DTML-Var monkeypatch
-	-	Added new "texvar" DTML command.
+    - Removed DTML-Var monkeypatch
+
+    - Added new "texvar" DTML command with special modifiers tex_quote and
+      format_maps. Some format maps are predefined: nl_to_dbs (\n -> \\),
+      nl_to_newline (\n -> \newline), tab_to_amp (\t -> &).
 
 Version 0.6
 

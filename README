@@ -38,6 +38,13 @@ The temporary copy is erased after a certain amount of time (keyword
 parameter t, defaults to 60 seconds) by a Thread started when calling
 create_temp and sleeping during this time.
 
+BACKWARDS COMPATIBILITY
+
+DTMLTeX 0.7 broke backwards compatibility in that dtml-var is no
+longer being patched but LaTeX-related functionality is instead in
+dtml-texvar. Documents which use tex_quote on dtml-var will stop
+working.
+
 EXAMPLES
 
 You can find a example for this tool in example.dtml. It's a letter
