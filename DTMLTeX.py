@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.22 2005/01/10 13:39:01 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.23 2005/01/10 16:49:49 thomas Exp $"""
 
 # Python imports
 import os.path
@@ -408,7 +408,7 @@ r'''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
       this page.
     </p>
 
-    <h2>Latex output (log file)</h2>
+    <h2>LaTeX output (log file)</h2>
 
 <pre>
 %s</pre>
