@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.8 2005/01/11 22:09:54 thomas Exp $"""
+$Id: texvar.py,v 1.9 2005/01/18 21:58:45 thomas Exp $"""
 
 # Zope imports
 
@@ -59,6 +59,25 @@ class TEXVar:
             if not isinstance(val, TaintedString):
                 val = ustr(val)
 
+            # Sanitize input, allowing for simpler format_maps which
+            # can take some things for granted:
+
+            # Retain a newline at the end.
+            newline_at_end = val.endswith('\n') or \
+                val.endswith('\r')
+
+            # Make line endings Unix-like, while trimming whitespace
+            # on the right (so empty lines are really empty).
+            lines = []
+            for line in val.splitlines():
+                lines.append(line.rstrip())
+            val = '\n'.join(lines)
+
+            if newline_at_end:
+                val += '\n'
+
+            # Now we can work with somewhat saner input.
+
             if args.has_key('tex_quote'):
                 val = replace_map(val, maps['tex_quote'])
 
@@ -87,8 +106,8 @@ class TEXVar:
 
 maps = { # Maps need to be lists of pairs as order of application may
          # be important (e.g., \ has to be quoted first of all).
-    'nl_to_dbs': [('\n', '\\\\\n')],
-    'nl_to_newline': [('\n', '\\newline\n')],
+    'nl_to_dbs': [('\n\n', '\n~\n'), ('\n', '\\\\\n')],
+    'nl_to_newline': [('\n\n', '\n~\n'), ('\n', '\\newline\n')],
     'tab_to_amp': [('\t', '&')],
     'tex_quote': [
         ("\\", r"\textbackslash{}"),
