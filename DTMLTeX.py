@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.14 2004/12/07 16:05:17 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.15 2004/12/07 21:46:16 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -77,6 +77,10 @@ r"""\documentclass{minimal}
 \begin{document}
 \end{document}
 """
+
+    encoding = "ascii" # Dumb but makes no assumptions about usage of
+		       # LaTeX's inputenc package.
+                       # XXX Should be configurable through the ZMI.
 
     security.declareProtected('View management screens',
                               'manage_editForm', 'manage',
@@ -147,7 +151,31 @@ r"""\documentclass{minimal}
 
         # That's it for option handling. Now let's go about returning
         # a result.
+
+        # At some point we need to care about character encoding.
+	# Since we don't want to fool people, we do this before
+	# returning anything, even raw TeX code.
+
+        # Whem writing out the TeX file later, we need 8 bit encoding.
+	# By going through Unicode we deal with whatever encoding our
+	# input came in. XXX Which is?
+        if not isinstance(tex_code, unicode):
+	    tex_code = tex_code.decode()
+
+        # Encoding errors are handled by silently replacing the
+	# offending characters with place holders. XXX Is this OK?
+	# There can still be trouble later if working with UTF-8:
+	# Since Python can't know about the subset of UTF-8 known to
+	# LaTeX's utf8.def/utf8enc.dfu, it is possible that characters
+	# get thrown at LaTeX that make it kick and scream.
+        # XXX Fixing this means patching LaTeX's inputenc mechanism so
+	# it doesn't fuck up but either uses place holders or silently
+	# weeps into the log file. We could use this for warning the
+	# user about missing characters.
+        tex_code = tex_code.encode(self.encoding, 'replace')
         
+	# This is the first time we might have something of interest.
+
         if tex_raw:
             # Somebody explicitly wants to see the tex code, not a
             # typeset postscript or pdf document.
