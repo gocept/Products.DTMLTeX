@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.15 2004/12/07 21:46:16 thomas Exp $"""
+$Id: DTMLTeX.py,v 1.16 2004/12/08 15:08:55 thomas Exp $"""
 
 from Globals import HTML, HTMLFile, MessageDialog, InitializeClass
 from OFS.content_types import guess_content_type
@@ -20,6 +20,7 @@ from OFS.DTMLMethod import DTMLMethod, decapitate
 from OFS.PropertyManager import PropertyManager
 from AccessControl import ClassSecurityInfo
 from ZODB.PersistentMapping import PersistentMapping
+from DocumentTemplate.DT_Util import TemplateDict
 import os.path
 import re
 from urllib import quote
@@ -62,8 +63,6 @@ class DTMLTeX(DTMLMethod, PropertyManager):
     manage_options = DTMLMethod.manage_options + \
                      PropertyManager.manage_options
 
-    defaultfilter = "pdf"
-
     filters = {'pdf': {'ct':'application/pdf',
                        'path':'/usr/bin/pdflatex',
                        'ext':'pdf'},
@@ -72,15 +71,22 @@ class DTMLTeX(DTMLMethod, PropertyManager):
                                            'genlatex'),
                       'ext':'ps'}}
 
+    encoding = "ascii" # Dumb but makes no assumptions about usage of
+                       # LaTeX's inputenc package.
+                       # XXX Should be configurable through the ZMI.
+
+    tex_raw = False
+    tex_filter = "pdf"
+
+    deliver = True
+    download = False
+    filename = None # Object ID will be used as a fall-back.
+
     default_dm_html = \
 r"""\documentclass{minimal}
 \begin{document}
 \end{document}
 """
-
-    encoding = "ascii" # Dumb but makes no assumptions about usage of
-		       # LaTeX's inputenc package.
-                       # XXX Should be configurable through the ZMI.
 
     security.declareProtected('View management screens',
                               'manage_editForm', 'manage',
@@ -104,78 +110,92 @@ r"""\documentclass{minimal}
         return self.filters.keys()
 
     def __call__(self, client=None, REQUEST=None, RESPONSE=None,
-                 tex_raw=False, deliver=True,
-                 download=None, filename=None, **kw):
+                 **kw):
         """Render the document given a client object, REQUEST mapping,
         and key word arguments."""
 
+        # Implement the option overriding cascade.
+        def get_option(name):
+            temp = getattr(self, name)
+            if REQUEST is not None:
+                temp = REQUEST.get(name, temp)
+            return kw.get(name, temp)
+
         #this list takes the temporary-file objects
+        # XXX Yeah, great. Where is it used anyway?
         tmp = [] 
         
         kw['document_id'] = self.id
         kw['document_title'] = self.title
         kw['__temporary_files__'] = tmp
 
-        # resolve dtml
+        # Resolve DTML.
         tex_code = HTML.__call__(self, client, REQUEST, **kw)
 
-        # Interpreting the DTMLMethod code: "client is None" means
-        # this is a subtemplate so no further processing and no HTTP
-        # headers are needed. On "RESPONSE is None", a DTMLMethod just
-        # returns the code, too.
-        if client is None or RESPONSE is None:
+        # A comment in DocumentTemplate.DT_String.__call__ indicates
+        # that being passed a TemplateDict as the REQUEST is
+        # characteristic for a sub-template (nested call). In that
+        # case, we're done.
+        if isinstance(REQUEST, TemplateDict):
             return tex_code
 
-        # Handle options
-        if download is None:
-            if hasattr(self, 'download'):
-                download = self.download
-            else:
-                download = False
-
-        if filename is None:
-            if hasattr(self, 'filename'):
-                filename = self.filename
-            else:
-                filename = self.id
-
-        if REQUEST is not None:
-            if REQUEST.has_key('tex_raw'):
-                tex_raw = TrueOrFalse(REQUEST['tex_raw'])
-            if REQUEST.has_key('deliver'):
-                deliver = TrueOrFalse(REQUEST['deliver'])
-            if REQUEST.has_key('download'):
-                download = TrueOrFalse(REQUEST['download'])
-            if REQUEST.has_key('filename'):
-                filename = REQUEST['filename']
-
-        # That's it for option handling. Now let's go about returning
-        # a result.
+        # We're still here, so we're the top template.
 
         # At some point we need to care about character encoding.
-	# Since we don't want to fool people, we do this before
-	# returning anything, even raw TeX code.
+        # What we write out to the TeX file must be a byte string.
+        # Since we don't want to fool people, we do this before
+        # returning anything, even raw TeX code.
 
-        # Whem writing out the TeX file later, we need 8 bit encoding.
-	# By going through Unicode we deal with whatever encoding our
-	# input came in. XXX Which is?
+        # By going through Unicode we deal with whatever encoding our
+        # input came in. XXX Which is? Hopefully the system enc...
         if not isinstance(tex_code, unicode):
-	    tex_code = tex_code.decode()
+            tex_code = tex_code.decode()
+
+        # Find the encoding to use.
+        encoding = get_option('encoding')
 
         # Encoding errors are handled by silently replacing the
-	# offending characters with place holders. XXX Is this OK?
-	# There can still be trouble later if working with UTF-8:
-	# Since Python can't know about the subset of UTF-8 known to
-	# LaTeX's utf8.def/utf8enc.dfu, it is possible that characters
-	# get thrown at LaTeX that make it kick and scream.
+        # offending characters with place holders. XXX Is this OK?
+        # There can still be trouble later if working with UTF-8:
+        # Since Python can't know about the subset of UTF-8 known to
+        # LaTeX's utf8.def/utf8enc.dfu, it is possible that characters
+        # get thrown at LaTeX that make it kick and scream.
         # XXX Fixing this means patching LaTeX's inputenc mechanism so
-	# it doesn't fuck up but either uses place holders or silently
-	# weeps into the log file. We could use this for warning the
-	# user about missing characters.
-        tex_code = tex_code.encode(self.encoding, 'replace')
-        
-	# This is the first time we might have something of interest.
+        # it doesn't fuck up but either uses place holders or silently
+        # weeps into the log file. We could use this for warning the
+        # user about missing characters.
+        tex_code = tex_code.encode(encoding, 'replace')
 
+        # This is the first time we might have something of interest.
+
+        # Find out what to do with the whole mess.
+        tex_raw = TrueOrFalse(get_option('tex_raw'))
+        if not tex_raw:
+            tex_filter = get_option('tex_filter')
+            if not tex_filter in self.filterIds():
+                tex_filter = DTMLTeX.tex_filter
+
+            tex_filter = self.filters[tex_filter]
+
+        deliver = TrueOrFalse(get_option('deliver'))
+        if deliver:
+            # In order to deliver anything, we need a
+            # RESPONSE. Changing the RESPONSE doesn't hurt since we
+            # won't pass it to nested calls anyway.
+            if RESPONSE is None and REQUEST is not None:
+                RESPONSE = REQUEST.RESPONSE
+
+            # If there's still no RESPONSE, we can't deliver.
+            if RESPONSE is None:
+                deliver = False
+            else:
+                download = TrueOrFalse(get_option('download'))
+
+                filename = get_option('filename')
+                if filename is None:
+                    filename = self.id
+
+        # Do it.
         if tex_raw:
             # Somebody explicitly wants to see the tex code, not a
             # typeset postscript or pdf document.
@@ -191,16 +211,8 @@ r"""\documentclass{minimal}
         
         # OK, we're still here. This means we have to throw the stuff
         # at the typesetter.
-
-        # Determine which typesetting filter chain to use
-        used_filter = REQUEST.get('tex_filter', self.defaultfilter)
-        if not used_filter in self.filterIds():
-            used_filter = self.defaultfilter
-        used_filter = self.filters[used_filter]
-
-        # Do the typesetting.
         try:
-            result = latex(used_filter['path'], used_filter['ext'],
+            result = latex(tex_filter['path'], tex_filter['ext'],
                            tex_code)
         except 'LatexError', (logdata, texfile):
             # The next lines are the Code-o-Beautifier *G
@@ -296,22 +308,19 @@ r"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 
             return errmsg
 
-        # Still here? Fine. Now we have a typeset document to return,
-        # maybe deliver.
+        # Still here? Fine. Now we have a typeset document to return.
 
-        # construct the content-type
         if deliver:
             RESPONSE.setHeader(
                 "Content-type",
-                "%s; name=%s.%s" % (used_filter['ct'],
+                "%s; name=%s.%s" % (tex_filter['ct'],
                                     filename,
-                                    used_filter['ext']))
-
+                                    tex_filter['ext']))
             if download:
                 RESPONSE.setHeader(
                     "Content-Disposition",
                     "attachment; filename=%s.%s" % (
-                        filename, used_filter['ext']))
+                        filename, tex_filter['ext']))
         return result
 
     security.declareProtected('View management screens', 'getFilters')
