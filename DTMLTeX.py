@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.9 2003/09/15 16:27:42 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.10 2003/11/14 22:21:57 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -236,7 +236,7 @@ class DTMLTeX( DTMLMethod, PropertyManager.PropertyManager):
                     manage_tabs_message="Filters updated.")
 
 #### This is for running the latex-command
-from os import chdir, execv, fork, waitpid, unlink
+from os import chdir, spawnv, waitpid, unlink, P_WAIT
 from thread import start_new_thread
 from time import sleep
 from tempfile import mktemp
@@ -245,15 +245,8 @@ import tempfile
 
 
 def tmpcmd ( path, args ):
-    pid= fork()
-    if pid==0:
-        #we are the child
-        chdir( tempfile.tempdir )
-        execv( path, args )
-    elif pid<0:
-        #something goes wrong
-        raise 'cant fork for command'
-    if waitpid(pid,0)[1]:
+    chdir( tempfile.tempdir )
+    if spawnv(P_WAIT, path, args ):
         raise 'CommandError'
         pass
     return
@@ -341,6 +334,9 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.10  2003/11/14 22:21:57  ctheune
+#  - checking spawnv to avoid forking (need windows compatibility)
+#
 # Revision 1.1.1.1.8.9  2003/09/15 16:27:42  ctheune
 #  - added support for DTMLTeXFile
 #
