@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: DTMLTeX.py,v 1.1.1.1.8.13 2003/11/17 21:32:05 ctheune Exp $
+# $Id: DTMLTeX.py,v 1.1.1.1.8.14 2004/02/10 16:37:12 ctheune Exp $
 
 """DTML TeX objects."""
 
@@ -198,7 +198,7 @@ import tempfile
 
 
 def tmpcmd ( path, args ):
-    chdir( tempfile.tempdir )
+    chdir( tempfile.gettempdir())
     if spawnv(P_WAIT, path, args ):
         raise 'CommandError'
         pass
@@ -207,7 +207,6 @@ def tmpcmd ( path, args ):
 def latex(binary, ext, temp, data):
     try:
     
-        tempfile.tempdir = temp
         base = mktemp()
         tex  = base + ".tex"
         output  = base + ".%s" % ext
@@ -233,7 +232,6 @@ def latex(binary, ext, temp, data):
                 raise 'LatexError', (stdout, data)
                 
             stdout = open(log,"r").read().split("\n")
-            
 
             # if the output contains hints about rerunning the generation (content etc) we do so ...
             # but at maximum 10 times ...
@@ -243,8 +241,8 @@ def latex(binary, ext, temp, data):
                 if line == "! Emergency stop." or line == "No pages of output.":
                     raise 'LatexError', (stdout, data)
         
-        f  = open(output, "r")
-        out= f.read()
+        f  = open(output, "rb")
+        out = f.read()
         f.close()
     finally:
         for i in glob(base+".*"):
@@ -287,6 +285,10 @@ OFS.Image.File.create_temp= create_temp
 
 
 # $Log: DTMLTeX.py,v $
+# Revision 1.1.1.1.8.14  2004/02/10 16:37:12  ctheune
+#  - tempfile usage for windows
+#  - reading in binary mode for windows
+#
 # Revision 1.1.1.1.8.13  2003/11/17 21:32:05  ctheune
 #  - Security updates
 #  - Fix for Bug 1455
