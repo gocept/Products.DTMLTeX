@@ -12,13 +12,14 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.25 2005/01/26 12:25:18 mac Exp $"""
+$Id: DTMLTeX.py,v 1.26 2005/01/26 19:58:13 thomas Exp $"""
 
 # Python imports
 import os.path
 from urllib import quote
-from tempfile import mkdtemp
-from os import chdir, listdir, getcwd, unlink, rmdir, \
+from tempfile import mkstemp, gettempdir
+from os import write, close, \
+    chdir, listdir, getcwd, unlink, rmdir, \
     spawnv, waitpid, P_WAIT
 
 # Zope imports
@@ -43,8 +44,6 @@ def TrueOrFalse(x):
 
 # Color for the error beautifier
 errorcolor = "#fc6"
-
-base = 'file'
 
 addForm = HTMLFile('dtml/texAdd', globals())
 
@@ -273,29 +272,31 @@ InitializeClass(DTMLTeX)
 
 # This is for running the latex-command
 def latex(binary, ext, tex_code):
-    cwd = getcwd()
+    tempdir = gettempdir()
 
-    dirpath = mkdtemp()
-    chdir(dirpath)
+    handle, texpath = mkstemp('.tex')
 
-    texfile = base + ".tex"
-    tex = os.path.join(dirpath, texfile)
-    output = os.path.join(dirpath, base + "." + ext)
-    log = os.path.join(dirpath, base + ".log")
+    tex = os.path.basename(texpath)
+    texbasedot = tex[:-3]
+    output = texbasedot + ext
+    log = texbasedot + 'log'
         
     # create temporary tex file
-    file(tex, "w").write(tex_code)
+    write(handle, tex_code)
+    close(handle)
 
     rerun = True  # flag for running the command again
     runs = 0      # count of runs already done.
 
+    cwd = getcwd()
     try:
+        chdir(tempdir)
         while rerun and runs <= 10:
             rerun = False
 
             try:
                 if spawnv(P_WAIT, binary,
-                          (binary, '-interaction=batchmode', texfile)):
+                          (binary, '-interaction=batchmode', tex)):
                     raise 'CommandError'
                 runs += 1
             except ('CommandError', OSError):
@@ -320,9 +321,11 @@ def latex(binary, ext, tex_code):
     finally:
         chdir(cwd)
 
-        for i in listdir(dirpath):
-            unlink(os.path.join(dirpath, i))
-        rmdir(dirpath)
+        for i in listdir(tempdir):
+            # XXX Is this safe? If a filename created by mkstemp is
+            # allowed to contain a dot, this filter is not enough.
+            if i.startswith(texbasedot):
+                unlink(os.path.join(tempdir, i))
 
     return out
 
