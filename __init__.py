@@ -15,7 +15,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# $Id: __init__.py,v 1.1.1.1.8.1 2002/07/24 22:19:54 ctheune Exp $
+# $Id: __init__.py,v 1.1.1.1.8.2 2002/07/24 22:41:11 ctheune Exp $
 __doc__    = """DTMLTeX initialization"""
 __version__= '0.01'
 
@@ -44,7 +44,7 @@ LOG('DTMLTeX',0, 'Applying tex_quote DTML monkeypatch.')
 from App import version_txt
 
 version = version_txt.getZopeVersion()
-_version = version[0] + "." + version[1]
+_version = str(version[0]) + "." + str(version[1])
 
 if version[0] != 2:
     LOG("DTMLTeX", 500, "Incompatible Zope Version. (not a Zope 2 Server). No Patch is beeing applied. Maybe you can live without the tex_quote.")
