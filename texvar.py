@@ -10,12 +10,17 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.11 2005/03/15 21:59:25 thomas Exp $"""
+$Id: texvar.py,v 1.12 2005/04/12 08:28:18 mac Exp $"""
 
 # Zope imports
 
 from ZPublisher.TaintedString import TaintedString
 from DocumentTemplate.DT_Util import parse_params, name_param, ustr
+
+from AccessControl import ModuleSecurityInfo
+
+module_security = ModuleSecurityInfo("Products.DTMLTeX.texvar")
+
 
 def replace_map(value, map):
     """Helper method to make multiple replacements that are
@@ -25,6 +30,7 @@ def replace_map(value, map):
         value = value.replace(old, new)
     return value
 
+module_security.declarePublic("transform_content")
 def transform_content(val, args):
     # Sanitize input, allowing for simpler format_maps which
     # can take some things for granted:
