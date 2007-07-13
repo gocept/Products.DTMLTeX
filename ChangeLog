@@ -1,3 +1,15 @@
+Trunk
+
+    - Ensured necessary reruns of longtable environments are recongnized.
+
+Version 0.7pre5
+
+    - ???
+	
+Version 0.7pre4
+
+    - ???
+
 Version 0.7pre3
 
     - Set content type for LaTeX error pages to text/html to override the
