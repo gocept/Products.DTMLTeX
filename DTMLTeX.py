@@ -12,7 +12,7 @@
 DTMLTeX objects are DTML-Methods that produce Postscript or PDF using
 LaTeX.
 
-$Id: DTMLTeX.py,v 1.26 2005/01/26 19:58:13 thomas Exp $"""
+$Id$"""
 
 # Python imports
 import os.path
@@ -310,8 +310,9 @@ def latex(binary, ext, tex_code):
             # generation (content etc) we do so ...
             # but at maximum 10 times ...
             for line in logdata:
-                if line.startswith("LaTeX Warning:") \
-                        and line.lower().find("rerun") != -1:
+                if ((line.startswith("LaTeX Warning:") or
+                     line.startswith("Package longtable Warning:")) and
+                    line.lower().find("rerun") != -1):
                     rerun = True
                 if line == "! Emergency stop." or \
                        line == "No pages of output.":
