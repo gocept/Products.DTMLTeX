@@ -50,7 +50,7 @@ addForm = HTMLFile('dtml/texAdd', globals())
 def add(self, id, title='', file='', REQUEST=None, submit=None):
     """Add a DTML TeX object with the contents of file. If
     'file' is empty, default document text is used."""
-    
+
     if type(file) is not type(''): file=file.read()
     ob = DTMLTeX(file, __name__=id)
     ob.title = title
@@ -74,7 +74,7 @@ class DTMLTeX(DTMLMethod, PropertyManager):
     commands = {}
     commands.update(DTMLMethod.commands)
     commands['texvar'] = texvar.TEXVar
-    
+
     index_html = None # Prevent accidental acquisition
 
     manage_options = DTMLMethod.manage_options + \
@@ -228,7 +228,7 @@ r"""\documentclass{minimal}
                         "Content-Disposition",
                         "attachment; filename=%s.tex" % filename)
             return tex_code
-        
+
         # OK, we're still here. This means we have to throw the stuff
         # at the typesetter.
         try:
@@ -280,7 +280,7 @@ def latex(binary, ext, tex_code):
     texbasedot = tex[:-3]
     output = texbasedot + ext
     log = texbasedot + 'log'
-        
+
     # create temporary tex file
     write(handle, tex_code)
     close(handle)
@@ -299,11 +299,16 @@ def latex(binary, ext, tex_code):
                           (binary, '-interaction=batchmode', tex)):
                     raise 'CommandError'
                 runs += 1
-            except ('CommandError', OSError):
+            except ('CommandError', OSError), e:
                 # OSError occurs on Win when a file (e.g. image) is not found
-                logdata = file(log).readlines()
+                try:
+                    logdata = file(log).readlines()
+                except IOError:
+                    if e is None:
+                        e = 'spawnv returned a value <> 0'
+                    logdata = [e]
                 raise 'LatexError', logdata
-                
+
             logdata = file(log).readlines()
 
             # if the output contains hints about rerunning the
@@ -317,7 +322,7 @@ def latex(binary, ext, tex_code):
                 if line == "! Emergency stop." or \
                        line == "No pages of output.":
                     raise 'LatexError', logdata
-        
+
         out = file(output, "rb").read()
     finally:
         chdir(cwd)
@@ -338,7 +343,7 @@ def compose_errmsg(logdata, tex_code):
     errlog = ""
     for line in logdata:
         line = html_quote(line);
-                
+
         if contline:
             stripped_line = line.lstrip()
             whitespace = line[:len(line)-len(stripped_line)]

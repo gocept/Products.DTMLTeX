@@ -9,7 +9,7 @@
 ######################################################################
 """Render the document into PDF using LaTeX.
 
-$Id: stxdocpatch.py,v 1.4 2004/03/09 14:32:16 thomas Exp $"""
+$Id$"""
 
 from zLOG import *
 

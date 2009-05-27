@@ -9,7 +9,7 @@
 ######################################################################
 """LaTeXClass parses structured text into LaTeX.
 
-$Id: LaTeXClass.py,v 1.4 2004/03/09 14:32:16 thomas Exp $"""
+$Id$"""
 
 class LaTeXClass:
     """LaTeXClass parses structured text into LaTeX."""

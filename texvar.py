@@ -10,7 +10,7 @@
 """A DTML tag that allows modification of the value with respect
 to tex specifics.
 
-$Id: texvar.py,v 1.12 2005/04/12 08:28:18 mac Exp $"""
+$Id$"""
 
 # Zope imports
 

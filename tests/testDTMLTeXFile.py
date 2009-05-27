@@ -7,7 +7,7 @@
 #######################################################################
 """Testcases for DTMLTeXFile
 
-$Id: testDTMLTeXFile.py,v 1.2 2004/03/08 18:21:51 thomas Exp $"""
+$Id$"""
 
 import unittest
 

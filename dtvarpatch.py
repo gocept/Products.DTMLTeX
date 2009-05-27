@@ -9,7 +9,7 @@
 ######################################################################
 """Convert structured text into LaTeX.
 
-$Id: dtvarpatch.py,v 1.3 2004/03/08 22:11:19 thomas Exp $"""
+$Id$"""
 
 from zLOG import *
 

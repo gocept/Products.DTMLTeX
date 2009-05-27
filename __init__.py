@@ -9,7 +9,7 @@
 ######################################################################
 """DTMLTeX initialization.
 
-$Id: __init__.py,v 1.8 2005/01/11 22:09:54 thomas Exp $"""
+$Id$"""
 
 import DTMLTeX
 from zLOG import *

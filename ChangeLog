@@ -2,13 +2,7 @@ Trunk
 
     - Ensured necessary reruns of longtable environments are recongnized.
 
-Version 0.7pre5
-
-    - ???
-	
-Version 0.7pre4
-
-    - ???
+    - Slightly better handling of errors when calling LaTeX.
 
 Version 0.7pre3
 
@@ -117,7 +111,7 @@ Version 0.5
       to Ivo van der Wijk.
 
     - You can optionally view the rendered DTML code instead of passing it to
-      the TeX interpreter, by putting "tex_raw" in the Request. 
+      the TeX interpreter, by putting "tex_raw" in the Request.
 
     - Some code cleanups.
 

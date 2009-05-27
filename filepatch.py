@@ -10,7 +10,7 @@
 """A patch to Zope's File content type for temporarily writing files
 from the ZODB to disk where TeX can find them.
 
-$Id: filepatch.py,v 1.1 2005/01/11 22:04:08 thomas Exp $"""
+$Id$"""
 
 #Python imports
 
