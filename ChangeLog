@@ -4,6 +4,13 @@ Trunk
 
     - Slightly better handling of errors when calling LaTeX.
 
+    - dtml-texvar:
+
+	- Fixed different behavior whether `tex_quote` was set as attribute
+	   resp. inside `format_maps`.
+
+	- Fixed encoding of German quotes entered on Windows.
+
 Version 0.7pre3
 
     - Set content type for LaTeX error pages to text/html to override the

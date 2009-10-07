@@ -2,7 +2,7 @@
 ######################################################################
 #
 # DTMLTeX - A Zope Product for PS/PDF generation with TeX
-# Copyright (C) 1999 Marian Kelc, 2002-2005 gocept gmbh & co. kg
+# Copyright (C) 1999 Marian Kelc, 2002-2009 gocept gmbh & co. kg
 #
 # See also LICENSE.txt
 #
@@ -51,7 +51,20 @@ def transform_content(val, args):
 
     # Now we can work with somewhat saner input.
 
-    if args.has_key('tex_quote'):
+    if args.has_key('format_maps'):
+        selected_maps = args['format_maps'].replace(' ', '').split(',')
+    else:
+        selected_maps = []
+
+    if 'tex_quote' in selected_maps:
+        tex_quote = True
+        selected_maps.pop(selected_maps.index('tex_quote'))
+    elif args.has_key('tex_quote'):
+        tex_quote = True
+    else:
+        tex_quote = False
+
+    if tex_quote:
         val = replace_map(val, maps['tex_quote'])
 
         # For replacing characters beyond ASCII (which
@@ -65,13 +78,11 @@ def transform_content(val, args):
         # unicode.
         val = unicode(val)
 
-        for c in math_chars:
-            val = val.replace(c, '\\ensuremath{%s}' % c)
+        for orig, replacement in unicode_chars:
+            val = val.replace(orig, replacement)
 
-    if args.has_key('format_maps'):
-        selected_maps = args['format_maps'].replace(' ', '').split(',')
-        for map in selected_maps:
-            val = replace_map(val, maps[map])
+    for map in selected_maps:
+        val = replace_map(val, maps[map])
 
     return val
 
@@ -91,7 +102,7 @@ class TEXVar:
         self.expr = expr
 
         self.args = args
-    
+
     def render(self, md):
         name = self.__name__
         args = self.args
@@ -133,8 +144,17 @@ maps = { # Maps need to be lists of pairs as order of application may
         ("|", r"\textbar{}"),
         ("<", r"\textless{}"),
         (">", r"\textgreater{}"),
-        ('"', r"\textquotedbl{}")
+        ('"', r"\textquotedbl{}"),
         ]
-}
+    }
 
-math_chars = [u'¹', u'²', u'³']
+unicode_chars =[
+    (u'¹', ur'\ensuremath{¹}'),
+    (u'²', ur'\ensuremath{²}'),
+    (u'³', ur'\ensuremath{³}'),
+    (u'µ', ur'\ensuremath{µ}'),
+    (u'„', ur'\glqq{}'),
+    (u'“', ur'\grqq{}'),
+    (u'\x84', ur'\glqq{}'), # Windows: „
+    (u'\x93', ur'\grqq{}'), # Windows: “
+    ]
