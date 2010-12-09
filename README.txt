@@ -1,5 +1,6 @@
-DTMLTeX
-=======
+=========
+ DTMLTeX
+=========
 
 This is DTMLTeX, a Zope Product similar to the DTML Method, but which
 gets sent through pdflatex (you may replace this with the default
@@ -8,16 +9,18 @@ latex/dvips procedure) and sends you a pdf file as view.
 This release is based on the Zope Product found on zope.org by
 Christian Theune <ct@gocept.com>.
 
-PREREQUISITES
+Prerequisites
+=============
 
-pdflatex
+``pdflatex``
 
-pdflatex should be installed in /usr/bin, otherwise change DTMLTeX.py
-This means that you must have installed a TeX system. The package
-assumes the binaries in /usr/bin/ - you can change this behavior by
-editing the DTMLTeX.py file.
+  pdflatex should be installed in /usr/bin, otherwise change DTMLTeX.py This
+  means that you must have installed a TeX system. The package assumes the
+  binaries in /usr/bin/ - you can change this behavior by editing the
+  DTMLTeX.py file.
 
-USAGE
+Usage
+=====
 
 In the content you can use all DTML-Tags you know. There is a new one,
 dtml-texvar, which is similar to dtml-var except that its available
@@ -32,14 +35,15 @@ For the special case that you want to include a file (e.g. a jpg file)
 stored in the Zope Database as a File-Object, a "create_temp" Method
 is added to the File class. This creates a temporary copy of the
 File's content in the system's tmp directory and inserts the temporary
-name of the File at the place where it was called (e.g.  <dtml-texvar
-"myfile.create_temp()">).
+name of the File at the place where it was called (e. g.  ``<dtml-texvar
+"myfile.create_temp()">``).
 
 The temporary copy is erased after a certain amount of time (keyword
 parameter t, defaults to 60 seconds) by a Thread started when calling
 create_temp and sleeping during this time.
 
-BACKWARDS COMPATIBILITY
+Backwards compatibility
+=======================
 
 DTMLTeX 0.7 broke backwards compatibility in that dtml-var is no
 longer being patched but LaTeX-related functionality is instead in
@@ -51,18 +55,21 @@ unicode. (You might get away without if you can guarantee that the
 strings in question never contains characters beyond the system
 encoding.)
 
-EXAMPLES
+Examples
+========
 
 You can find a example for this tool in example.dtml. It's a letter
 typeset using the KOMA-script letter class scrlttr2 and includes an
 image as well as variables of several types.
 
-CONTACT
+Contact
+=======
 
 For suggestions, ideas, or questions, send mail to
 Thomas Lotze <tl@gocept.com>
 
-HISTORY
+History
+=======
 
 This Product was first developed by Marian Kelc in 1999. Due to
 changes in Zope and lack of time from Marian, Christian Theune
@@ -73,8 +80,10 @@ In 2002, Andreas Kostyrka <andreas@kostyrka.priv.at> added the
 following features:
 
 - Conversion of Structured Text to LaTeX.
+
   + <dtml-texvar stxtxt fmt=structured-tex>
     This adds LaTeX code generated from stxtxt.
+
 - StructuredDocument support.
   If the StructuredDocument product by maik.jablonski@uni-bielefeld.de
   is found, it is patched to support a /pdf method that creates a PDF
@@ -85,7 +94,8 @@ following features:
   For an example in production use see http://www.detox.at/ and
   http://www.detox.at/index_html/pdf
 
-BUGS
+Bugs
+====
 
 It is not generally possible to find out for sure whether a given
 DTMLTeX call is the original one made by whoever requested the LaTeX

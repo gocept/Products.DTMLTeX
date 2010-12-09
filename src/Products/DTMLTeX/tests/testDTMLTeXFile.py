@@ -19,21 +19,21 @@ import StringIO
 from ZPublisher.HTTPRequest import HTTPRequest
 from ZPublisher.HTTPResponse import HTTPResponse
 
-from Products.DTMLTeX.DTMLTeXFile import DTMLTeXFile
+from Products.DTMLTeX.DTMLTeX import DTMLTeX
 
 class DTMLTeXFileTests(unittest.TestCase):
     """Tests for the DTMLTeXFile
     """
 
     def __create(self, file="asdf"):
-        x = DTMLTeXFile(file, _prefix='/home/ctheune/Yukon/Products/DTMLTeX/tests/')
+        x = DTMLTeX(file, _prefix='/home/ctheune/Yukon/Products/DTMLTeX/tests/')
         return x
 
     def testInstanciation(self):
         file = self.__create("test1.tex")
-        assert isinstance(file, DTMLTeXFile)
+        assert isinstance(file, DTMLTeX)
         file.REQUEST = get_fake_request()
-        assert file(client=file)
+        self.assert_(file(client=file))
 
 
 def get_fake_request():
