@@ -1,9 +1,0 @@
-<configuration>
-
-<mapper name="Product.DTMLTeX.DTMLTeX.DTMLTeX"
-        extends="base_p"
-        parent="root">
-</mapper>
-
-</configuration>
-
