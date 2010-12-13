@@ -3,8 +3,8 @@
 =========
 
 
-1.0 (unreleased)
-================
+1.0.0 (2010-12-13)
+==================
 
     - Packaged as an egg to be useable in Zope 2.11.
 
